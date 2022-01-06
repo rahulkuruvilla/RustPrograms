@@ -5,7 +5,7 @@ use tokio::{
     sync::broadcast,
 };
 
-// BASIC ASYNCHRONOUS TCP ECHO SERVER
+// BASIC ASYNCHRONOUS TCP BROADCASTING SERVER
 // server can be run with: $ cargo run server
 // server can be tested with multiple client instances of: $ telnet localhost 8080 
 // messages made to the server by a single client will be broadcasted to all other client instances
