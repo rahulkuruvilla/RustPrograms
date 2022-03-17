@@ -11,3 +11,12 @@ Cargo.lock
 
 /enum-passing/target/
 /broadcaster/target/
+/dkg-run/target
+/config-manager/target/
+/enum-passing/target/
+/node/target/
+
+# exclude other git repos
+/rust-libp2p/
+/rust-peer-to-peer-example/
+/aggregatable-dkg/
