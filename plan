@@ -1,7 +1,0 @@
-(Rather than writing/reading to file, use the address of the DKG Transcript and pass it into the functions that handle it's state)
-
-
-
-Each node sends msg to config manager saying 'Connected'
-Once config manager has recieved |Nodes| lots of 'Connected' it sends a message to all nodes saying 'Start' the DKG
-
