@@ -1,0 +1,20 @@
+use crate::dkg::errors::DKGError;
+use ark_ec::{PairingEngine, ProjectiveCurve};
+use ark_ff::UniformRand;
+use rand::Rng;
+use ark_serialize::*;
+
+#[derive(Clone, CanonicalSerialize, CanonicalDeserialize)]
+pub struct SRS<E: PairingEngine> {
+    pub g_g1: E::G1Affine,
+    pub h_g2: E::G2Affine,
+}
+
+impl<E: PairingEngine> SRS<E> {
+    pub fn setup<R: Rng>(rng: &mut R) -> Result<Self, DKGError<E>> {
+        Ok(Self {
+            g_g1: E::G1Projective::rand(rng).into_affine(),
+            h_g2: E::G2Projective::rand(rng).into_affine(),
+        })
+    }
+}
