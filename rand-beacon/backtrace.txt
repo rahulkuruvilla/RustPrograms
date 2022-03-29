@@ -1,0 +1,110 @@
+participant is going to be sent
+Received participants struct from cm 
+ps.len()=0
+ps len: 0
+thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value: InvalidParticipantId(0)', src/main.rs:137:54
+stack backtrace:
+   0:        0x106792e91 - std::backtrace_rs::backtrace::libunwind::trace::h0b624e35bf84187c
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/std/src/../../backtrace/src/backtrace/libunwind.rs:93:5
+   1:        0x106792e91 - std::backtrace_rs::backtrace::trace_unsynchronized::h435d9bd636904605
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/std/src/../../backtrace/src/backtrace/mod.rs:66:5
+   2:        0x106792e91 - std::sys_common::backtrace::_print_fmt::h3ca407d645e7e73d
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/std/src/sys_common/backtrace.rs:67:5
+   3:        0x106792e91 - <std::sys_common::backtrace::_print::DisplayBacktrace as core::fmt::Display>::fmt::h4f26ffad025fdbe8
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/std/src/sys_common/backtrace.rs:46:22
+   4:        0x1067ae7db - core::fmt::write::h0a9937d83d3944c1
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/core/src/fmt/mod.rs:1168:17
+   5:        0x10678ca98 - std::io::Write::write_fmt::hfaf2e2e92eda8127
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/std/src/io/mod.rs:1660:15
+   6:        0x1067957d7 - std::sys_common::backtrace::_print::h11335bd900abe1ce
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/std/src/sys_common/backtrace.rs:49:5
+   7:        0x1067957d7 - std::sys_common::backtrace::print::hdf5291c87f745042
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/std/src/sys_common/backtrace.rs:36:9
+   8:        0x1067957d7 - std::panicking::default_hook::{{closure}}::hc11e9b8d348e68b0
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/std/src/panicking.rs:211:50
+   9:        0x1067953e5 - std::panicking::default_hook::h1d26ec4d0d63be04
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/std/src/panicking.rs:228:9
+  10:        0x106795e60 - std::panicking::rust_panic_with_hook::hef4f5e524db188b3
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/std/src/panicking.rs:606:17
+  11:        0x106795b8e - std::panicking::begin_panic_handler::{{closure}}::h6e8805ea2351af89
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/std/src/panicking.rs:502:13
+  12:        0x106793307 - std::sys_common::backtrace::__rust_end_short_backtrace::hd383ade987b76f63
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/std/src/sys_common/backtrace.rs:139:18
+  13:        0x10679587a - rust_begin_unwind
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/std/src/panicking.rs:498:5
+  14:        0x1067bdf7f - core::panicking::panic_fmt::hb58956db718d5b79
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/core/src/panicking.rs:116:14
+  15:        0x1067bdff5 - core::result::unwrap_failed::he6d7833eae74c72a
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/core/src/result.rs:1690:5
+  16:        0x105ff64da - core::result::Result<T,E>::unwrap::h322125639cccaf6e
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/core/src/result.rs:1018:23
+  17:        0x1060a8d89 - <rand_beacon::NodeBehaviour as libp2p_swarm::behaviour::NetworkBehaviourEventProcess<libp2p_floodsub::layer::FloodsubEvent>>::inject_event::hb9e09416f17e4e69
+                               at /Users/rahulkuruvilla/OneDrive/OneDrive - University College London/UCLYear/Final Year Project/RustPrograms/rand-beacon/src/main.rs:137:33
+  18:        0x1060ac439 - <rand_beacon::NodeBehaviour as libp2p_swarm::behaviour::NetworkBehaviour>::poll::hda4983f0914541df
+                               at /Users/rahulkuruvilla/OneDrive/OneDrive - University College London/UCLYear/Final Year Project/RustPrograms/rand-beacon/src/main.rs:72:10
+  19:        0x10610523e - libp2p_swarm::ExpandedSwarm<TBehaviour,TInEvent,TOutEvent,THandler>::poll_next_event::h30a0311dc72bfa89
+                               at /Users/rahulkuruvilla/.cargo/registry/src/github.com-1ecc6299db9ec823/libp2p-swarm-0.30.0/src/lib.rs:712:17
+  20:        0x10610932f - <libp2p_swarm::ExpandedSwarm<TBehaviour,TInEvent,TOutEvent,THandler> as futures_core::stream::Stream>::poll_next::hb9aee4d37a3923da
+                               at /Users/rahulkuruvilla/.cargo/registry/src/github.com-1ecc6299db9ec823/libp2p-swarm-0.30.0/src/lib.rs:906:9
+  21:        0x10610f3c1 - futures_util::stream::stream::StreamExt::poll_next_unpin::he05f6df2064e79ce
+                               at /Users/rahulkuruvilla/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-util-0.3.21/src/stream/stream/mod.rs:1626:9
+  22:        0x1060e696c - <futures_util::stream::stream::select_next_some::SelectNextSome<St> as core::future::future::Future>::poll::hab46ff84573f1fed
+                               at /Users/rahulkuruvilla/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-util-0.3.21/src/stream/stream/select_next_some.rs:34:36
+  23:        0x1060af5af - rand_beacon::main::{{closure}}::{{closure}}::h16c270b4f0b71b42
+                               at /Users/rahulkuruvilla/.cargo/registry/src/github.com-1ecc6299db9ec823/tokio-1.17.0/src/macros/select.rs:505:49
+  24:        0x105fa3012 - <tokio::future::poll_fn::PollFn<F> as core::future::future::Future>::poll::h823a4a96b8947c34
+                               at /Users/rahulkuruvilla/.cargo/registry/src/github.com-1ecc6299db9ec823/tokio-1.17.0/src/future/poll_fn.rs:38:9
+  25:        0x1060ade87 - rand_beacon::main::{{closure}}::h9b9c7c35cf422eeb
+                               at /Users/rahulkuruvilla/OneDrive/OneDrive - University College London/UCLYear/Final Year Project/RustPrograms/rand-beacon/src/main.rs:320:9
+  26:        0x10605271a - <core::future::from_generator::GenFuture<T> as core::future::future::Future>::poll::hf30f378d8a8dd030
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/core/src/future/mod.rs:84:19
+  27:        0x1060ffa21 - tokio::park::thread::CachedParkThread::block_on::{{closure}}::h797ef87e6b73442d
+                               at /Users/rahulkuruvilla/.cargo/registry/src/github.com-1ecc6299db9ec823/tokio-1.17.0/src/park/thread.rs:263:54
+  28:        0x10601c941 - tokio::coop::with_budget::{{closure}}::h39e274270f059b56
+                               at /Users/rahulkuruvilla/.cargo/registry/src/github.com-1ecc6299db9ec823/tokio-1.17.0/src/coop.rs:102:9
+  29:        0x10604684e - std::thread::local::LocalKey<T>::try_with::h58f1cd180e96e5bb
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/std/src/thread/local.rs:412:16
+  30:        0x106046568 - std::thread::local::LocalKey<T>::with::hbd652bbcb17a4b8c
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/std/src/thread/local.rs:388:9
+  31:        0x1060ff404 - tokio::coop::with_budget::hba9ac92314bf514c
+                               at /Users/rahulkuruvilla/.cargo/registry/src/github.com-1ecc6299db9ec823/tokio-1.17.0/src/coop.rs:95:5
+  32:        0x1060ff404 - tokio::coop::budget::hb1276815b2f9b6ad
+                               at /Users/rahulkuruvilla/.cargo/registry/src/github.com-1ecc6299db9ec823/tokio-1.17.0/src/coop.rs:72:5
+  33:        0x1060ff404 - tokio::park::thread::CachedParkThread::block_on::h59d3bba2d41e0937
+                               at /Users/rahulkuruvilla/.cargo/registry/src/github.com-1ecc6299db9ec823/tokio-1.17.0/src/park/thread.rs:263:31
+  34:        0x10604f6a6 - tokio::runtime::enter::Enter::block_on::h6a3a3b777dc7b201
+                               at /Users/rahulkuruvilla/.cargo/registry/src/github.com-1ecc6299db9ec823/tokio-1.17.0/src/runtime/enter.rs:151:13
+  35:        0x105fc430d - tokio::runtime::thread_pool::ThreadPool::block_on::h830a69b15d6c7f72
+                               at /Users/rahulkuruvilla/.cargo/registry/src/github.com-1ecc6299db9ec823/tokio-1.17.0/src/runtime/thread_pool/mod.rs:73:9
+  36:        0x105ffdd06 - tokio::runtime::Runtime::block_on::h34dc5308865b4b7f
+                               at /Users/rahulkuruvilla/.cargo/registry/src/github.com-1ecc6299db9ec823/tokio-1.17.0/src/runtime/mod.rs:477:43
+  37:        0x1060ac8a5 - rand_beacon::main::h4bd520558275e470
+                               at /Users/rahulkuruvilla/OneDrive/OneDrive - University College London/UCLYear/Final Year Project/RustPrograms/rand-beacon/src/main.rs:319:5
+  38:        0x105f6621e - core::ops::function::FnOnce::call_once::heb0d7b8a90e5f8e6
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/core/src/ops/function.rs:227:5
+  39:        0x10610fda1 - std::sys_common::backtrace::__rust_begin_short_backtrace::h3fb5af1a59bb1f21
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/std/src/sys_common/backtrace.rs:123:18
+  40:        0x10610fd64 - std::rt::lang_start::{{closure}}::hfe5aad7a7f687251
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/std/src/rt.rs:145:18
+  41:        0x10679259e - core::ops::function::impls::<impl core::ops::function::FnOnce<A> for &F>::call_once::h1d1e9294d7151cb0
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/core/src/ops/function.rs:259:13
+  42:        0x10679259e - std::panicking::try::do_call::h315943602cc1e70c
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/std/src/panicking.rs:406:40
+  43:        0x10679259e - std::panicking::try::h5be753f80fffd492
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/std/src/panicking.rs:370:19
+  44:        0x10679259e - std::panic::catch_unwind::h9fdcb02c74b07e26
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/std/src/panic.rs:133:14
+  45:        0x10679259e - std::rt::lang_start_internal::{{closure}}::h1558447834abc29f
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/std/src/rt.rs:128:48
+  46:        0x10679259e - std::panicking::try::do_call::h5721bf6e49d6926d
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/std/src/panicking.rs:406:40
+  47:        0x10679259e - std::panicking::try::hee7cffb35a5e550d
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/std/src/panicking.rs:370:19
+  48:        0x10679259e - std::panic::catch_unwind::hf45e91e6006ab16e
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/std/src/panic.rs:133:14
+  49:        0x10679259e - std::rt::lang_start_internal::h64086fc6655bfbe8
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/std/src/rt.rs:128:20
+  50:        0x10610fd3e - std::rt::lang_start::h3f303616d5223815
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/std/src/rt.rs:144:17
+  51:        0x1060ca6e6 - <unknown>
+                               at /rustc/9d1b2106e23b1abd32fce1f17267604a5102f57a/library/core/src/option.rs:512:25

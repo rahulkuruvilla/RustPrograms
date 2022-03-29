@@ -368,8 +368,8 @@ async fn send_participants(
     let _ = participants.serialize(buf_ref);
 
     //CHECK IF DESERIALISATION WORKS !!!
-    if let Ok(ps) = Vec::<Participant::<Bls12_381, BLSSignature<BLSSignatureG1<Bls12_381>>>>::deserialize(&*buffer){
-        println!("deserialization, ps.len()={}", ps.len())
+    if let Ok(ps) =  Vec::<Participant::<ark_ec::bls12::Bls12<ark_bls12_381::Parameters>, aggregatable_dkg::signature::bls::BLSSignature<aggregatable_dkg::signature::bls::BLSSignatureG1<ark_ec::bls12::Bls12<ark_bls12_381::Parameters>>>>>::deserialize(&*buffer){
+        println!("deserialization, ps.len()={}, ps[1].state={}", ps.len(), ps[1].state)
     }
     
     if behaviour.state == 1 {
