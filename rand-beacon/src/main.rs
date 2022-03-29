@@ -106,6 +106,47 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour {
         //message is a Vec<u8>
         if let FloodsubEvent::Message(message) = message {
 
+            if let Ok(ps) = Vec::<Participant::<Bls12_381, BLSSignature<BLSSignatureG1<Bls12_381>>>>::deserialize(&*message.data) {
+                if self.state == 2{
+                    println!("Received participants struct from cm "); //some of these are empty???? maybe try serializing BtreeMap version
+                    ps.iter().for_each(|p| println!("{}", p.id));
+                    println!("ps.len()={}", ps.len());
+
+
+                    let node_data = self.node_extra.clone();
+                    let pok = node_data.bls_pok.unwrap();
+                    let sig = node_data.bls_sig.unwrap();
+                    let this_dealer = node_data.dealer.unwrap();
+
+                    let degree: usize = self.dkg_init.dkg_config.degree.clone();
+                    let num_sz: usize = self.dkg_init.num_nodes.clone();
+                    let mut this_node: Node<Bls12_381, BLSSignature<BLSSignatureG2<Bls12_381>>, BLSSignature<BLSSignatureG1<Bls12_381>>> = Node {
+                        aggregator: DKGAggregator {
+                            config: self.dkg_init.dkg_config.clone(),
+                            scheme_pok: pok,
+                            scheme_sig: sig,
+                            participants: ps.clone().into_iter().enumerate().collect(),
+                            transcript: DKGTranscript::empty(degree, num_sz),
+                        },
+                        dealer: this_dealer,
+                    };
+
+                    println!("ps len: {}", this_node.aggregator.participants.len());
+                    let rng = &mut thread_rng();
+                    //let ref_node = &mut this_node;
+                    let share = this_node.share(rng).unwrap();
+                    println!("idss{}", &share.participant_id);
+                    this_node.receive_share_and_decrypt(rng, share.clone()).unwrap();
+                    self.node_extra.node = Some(this_node);
+                    // send out this share to the swarm
+                    stage_channel_data(
+                        self.response_sender.clone(), 
+                        ChannelData::Share(share)
+                    )
+                    
+                }
+            }
+
             if let Ok(dkg_init) = DKGInit::<Bls12_381>::deserialize(&*message.data) {
                 if self.state == 0 {
                     println!("num_nodes: {}", dkg_init.num_nodes);
@@ -160,46 +201,6 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour {
                         self.response_sender.clone(), 
                         ChannelData::Party(participant)
                     )
-                }
-            }
-            if let Ok(ps) = Vec::<Participant::<Bls12_381, BLSSignature<BLSSignatureG1<Bls12_381>>>>::deserialize(&*message.data) {
-                if self.state == 2{
-                    println!("Received participants struct from cm "); //some of these are empty
-                    ps.iter().for_each(|p| println!("{}", p.id));
-                    println!("ps.len()={}", ps.len());
-
-
-                    let node_data = self.node_extra.clone();
-                    let pok = node_data.bls_pok.unwrap();
-                    let sig = node_data.bls_sig.unwrap();
-                    let this_dealer = node_data.dealer.unwrap();
-
-                    let degree: usize = self.dkg_init.dkg_config.degree.clone();
-                    let num_sz: usize = self.dkg_init.num_nodes.clone();
-                    let mut this_node: Node<Bls12_381, BLSSignature<BLSSignatureG2<Bls12_381>>, BLSSignature<BLSSignatureG1<Bls12_381>>> = Node {
-                        aggregator: DKGAggregator {
-                            config: self.dkg_init.dkg_config.clone(),
-                            scheme_pok: pok,
-                            scheme_sig: sig,
-                            participants: ps.clone().into_iter().enumerate().collect(),
-                            transcript: DKGTranscript::empty(degree, num_sz),
-                        },
-                        dealer: this_dealer,
-                    };
-
-                    println!("ps len: {}", this_node.aggregator.participants.len());
-                    let rng = &mut thread_rng();
-                    //let ref_node = &mut this_node;
-                    let share = this_node.share(rng).unwrap();
-                    println!("idss{}", &share.participant_id);
-                    this_node.receive_share_and_decrypt(rng, share.clone()).unwrap();
-                    self.node_extra.node = Some(this_node);
-                    // send out this share to the swarm
-                    stage_channel_data(
-                        self.response_sender.clone(), 
-                        ChannelData::Share(share)
-                    )
-                    
                 }
             }
             

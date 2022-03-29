@@ -14,5 +14,4 @@ Cargo.lock
 # exclude other git repos
 /rust-libp2p/
 /rust-peer-to-peer-example/
-/aggregatable-dkg/
 /dist_keygen_with_ecdsa_and_libp2p

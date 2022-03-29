@@ -362,11 +362,15 @@ async fn send_participants(
 ){
     let behaviour = swarm.behaviour_mut();
 
-    // THIS NEEDS TO BE DONE FOR ALL ITEMS IN THE PARTICIPANTS LIST!!!!
     let sz = participants.serialized_size();
     let mut buffer = Vec::with_capacity(sz); 
     let buf_ref = buffer.by_ref();
     let _ = participants.serialize(buf_ref);
+
+    //CHECK IF DESERIALISATION WORKS !!!
+    if let Ok(ps) = Vec::<Participant::<Bls12_381, BLSSignature<BLSSignatureG1<Bls12_381>>>>::deserialize(&*buffer){
+        println!("deserialization, ps.len()={}", ps.len())
+    }
     
     if behaviour.state == 1 {
         behaviour.floodsub.publish(TOPIC.clone(), buffer);
