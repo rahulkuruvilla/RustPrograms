@@ -27,3 +27,6 @@ Multiple clients can connect to the server, by running the previous command as m
 
 The TCP server will broadcast messages it recieves from a single client to all client instances connected to it.
 
+
+Please note, the Aggregatable DKG library is from Kobi Gurkan.
+
