@@ -1,0 +1,76 @@
+
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct DKGInit<E: PairingEngine> {
+    pub NODES: usize,
+    pub rng: ThreadRng,
+    pub dkg_config: Config<E: PairingEngine>,
+}
+
+// node's keys at end of dkg
+pub struct DKGKeys {
+    pub master_public_key: G1Affine,
+    pub node_pk: G1Affine,
+    pub node_sk: G2Affine,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct VUFInit<E: PairingEngine> {
+    pub sig_srs: SRS<E: PairingEngine>,
+    pub message: &[u8],
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct VUFSig<E: PairingEngine> {
+    pub proven_public_key: ProvenPublicKey<E: PairingEngine>,
+    pub signature: Signature<E: PairingEngine>,
+}
+
+pub enum EventType {
+    ConfigManager(DKGInit),
+    Node(Participant),
+    Node(Node),
+
+    ConfigManager(VUFInit),
+    Node(VUFSig),
+}
+
+// each node has one stored in the network behaviour
+pub struct RBNode {
+    pub dkg_init: DKGInit<E: PairingEngine>,
+    pub bls_sig: BLSSignature::<BLSSignatureG1<Bls12_381>>,
+    pub bls_pok: BLSSignature::<BLSSignatureG2<Bls12_381>>,
+    pub dealer: Dealer,
+    pub node: Node,
+    pub keys: DKGKeys
+}
+
+//need a var in network behviour to keep track of each part of dkg
+pub state: usize;
+pub participant_id: usize; // needs to be hardcoded
+
+
+//the following 2 functions are the same - use a ChannelData enum and match on the 2nd parameter!
+fn stage_participant(
+    sender: mpsc::UnboundedSender<ChannelData>, 
+    participant: Participant::<Bls12_381, BLSSignature<BLSSignatureG1<Bls12_381>>>
+) {
+    tokio::spawn(async move {
+        let data: ChannelData = ChannelData::Party(participant);
+        if let Err(e) = sender.send(data) {
+            error!("ERROR (Channel data not sent): {}", e);
+        }
+    });
+}
+
+fn stage_dkg_share(
+    sender: mpsc::UnboundedSender<ChannelData>, 
+    dkg_share: DKGShare::<Bls12_381, BLSSignature<BLSSignatureG2<Bls12_381>>, BLSSignature<BLSSignatureG1<Bls12_381>>>
+) {
+    tokio::spawn(async move {
+        let data: ChannelData = ChannelData::Share(dkg_share);
+        if let Err(e) = sender.send(data) {
+            error!("ERROR (Channel data not sent): {}", e);
+        }
+    });
+}

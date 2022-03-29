@@ -1,0 +1,26 @@
+
+
+
+Node's state
+0 = on node boot
+1 = once node receives DKGInit from CM 
+2 = once node has sent participant struct to swarm (for DKG)
+3 = once node has received participants vec from CM
+4 = once node has sent out it's DKGShare to network
+
+
+
+
+
+
+
+
+
+
+
+
+
+Config Manager's state
+0 = on CM boot
+1 = once sent DKGInit to all nodes, accepting incomimg participant structs
+2 = once received all Participant structs
