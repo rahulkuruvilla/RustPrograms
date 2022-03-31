@@ -412,10 +412,7 @@ async fn main() -> Result<(), Box<dyn Error>>{
                 let line = line?.expect("stdin closed");
                 println!("line: {:?}", &line);
                 //swarm.behaviour_mut().floodsub.publish(TOPIC.clone(), line.as_bytes());
-                if line == "start"{
-                    let peers = list_peers(&mut swarm).await;
-                    init_dkg(peers, &mut swarm).await;
-                }else if line == "check"{
+                if line == "check"{
                     check_state(&mut swarm).await;
                 }else if line == "ls"{
                     list_peers(&mut swarm).await;
@@ -485,44 +482,6 @@ async fn check_state(swarm: &mut Swarm<NodeBehaviour>) {
     println!("Checking state");
     let behaviour = swarm.behaviour_mut();
     println!("This node's state is {}", behaviour.state);
-}
-
-
-// cm runs this when all nodes connected
-async fn init_dkg(connected_peers: Vec<Vec<u8>>, swarm: &mut Swarm<NodeBehaviour>){
-    let behaviour = swarm.behaviour_mut();
-    if behaviour.state != 0 {
-        return
-    }
-
-    println!("This config manager is starting the DKG!");
-    let num_nodes: usize = 2; 
-    let rng = &mut thread_rng();
-    let dkg_srs = DkgSRS::<Bls12_381>::setup(rng).unwrap();
-    let u_1 = G2Projective::rand(rng).into_affine();
-    let degree = 2;
-
-    let dkg_config = Config {
-        srs: dkg_srs.clone(),
-        u_1,
-        degree: degree,
-    };
-
-    let cm_dkg_init = DKGInit {
-        num_nodes: num_nodes,
-        peers: connected_peers,
-        dkg_config: dkg_config,
-    };
-
-    let sz = cm_dkg_init.serialized_size();
-    let mut buffer = Vec::with_capacity(sz); 
-    let buf_ref = buffer.by_ref();
-    let _ = cm_dkg_init.serialize(buf_ref);
-    
-    behaviour.floodsub.publish(TOPIC.clone(), buffer);
-    behaviour.state = 1;
-    behaviour.dkg_init = cm_dkg_init;
-
 }
 
 async fn send_participant(

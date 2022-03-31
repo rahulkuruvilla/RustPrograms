@@ -44,11 +44,11 @@ use libp2p::{
     swarm::{NetworkBehaviourEventProcess, SwarmEvent, Swarm, SwarmBuilder},
     tcp::TokioTcpConfig,
     NetworkBehaviour, PeerId, Transport,
+    multihash::{Code, Multihash, MultihashDigest},
 };
 use log::{error, info};
 use once_cell::sync::Lazy;
 use tokio::{io::AsyncBufReadExt, sync::mpsc};
-//use sha2::{Sha256, Digest};
 
 use rand_beacon::data::{DKGInit, VUFInit, VUFNodeData, VUFNodesData};
 use rand_beacon::sig_srs::SigSRSExt;
@@ -234,15 +234,15 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour{
                     let mut buffer = Vec::with_capacity(sz); 
                     let buf_ref = buffer.by_ref();
                     let _ = aggregated_sig.serialize(buf_ref);
-                    println!("sigma={:?}", &buffer);
+                    println!("sigma={:?}\n", &buffer);
 
-                    /*
-                    let mut hasher = Sha256::new();
-                    hasher.update(&buffer);
-                    let result = hasher.finalize();
-                    println!("sha256(sigma)= {:?}", result);
-                    */
-
+                    // hash buffer containing aggregated signature
+                    let to_hash = &buffer[..];
+                    let multi_hash = Code::Sha2_256.digest(to_hash);
+                    let hash = multi_hash.digest();
+                    println!("sha2_256(sigma)= {:02x?}", hash);
+                    
+                    // get time elapsed from start of DKG
                     let start_time = self.start_time.clone();
                     let this_start_time = start_time.unwrap();
                     let elapsed = this_start_time.elapsed();
@@ -250,8 +250,6 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour{
                 }
 
             }
-
-
         }
     }
         
