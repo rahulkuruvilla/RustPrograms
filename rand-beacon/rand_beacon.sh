@@ -6,14 +6,15 @@ t=1
 cargo build --release
 for i in {0..$n}
 do
-  echo "Number: $i"
+  echo "Starting node $i"
   cargo run --bin rand-beacon &
+  # ./node
 done
 
 # can pass in num_node and threshold here or we manually run this outside of this file
 # stdin on nodes needs to be closed before we do this
-cargo run --bin cm
-
+cargo run --bin cm $n $t
+# OR ./cm $n $t
 
 
 #get PID of running nodes

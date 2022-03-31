@@ -6,8 +6,8 @@ Node's state
 1 = once node receives DKGInit from CM 
 2 = once node has sent participant struct to swarm (for DKG)
 3 = once node has received participants vec from CM
-4 = once node has sent out it's DKGShare to network
-
+4 = once node has sent out msg to CM saying it's ready to aggregate
+5 = once node receives msg from CM to start it sends it's DKGShare to network
 
 
 
@@ -24,3 +24,5 @@ Config Manager's state
 0 = on CM boot
 1 = once sent DKGInit to all nodes, accepting incomimg participant structs
 2 = once received all Participant structs
+3 = once has received 'Ready' messages from all nodes it sends out "start aggregating" msg to network
+4 = once sent out vuf_srs and message to sign on

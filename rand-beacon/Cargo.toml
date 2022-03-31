@@ -26,3 +26,4 @@ rand_chacha = { version = "0.2.1" }
 once_cell = "^1.7"
 blake2s_simd = "0.5.10"
 serde_with = { version = "1.10.0"}
+# sha2 = "0.10.2"

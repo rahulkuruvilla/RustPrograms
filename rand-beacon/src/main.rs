@@ -46,7 +46,9 @@ use std::collections::HashSet;
 use once_cell::sync::Lazy;
 use tokio::{fs, io::AsyncBufReadExt, sync::mpsc};
 
-use rand_beacon::data::DKGInit;
+use rand_beacon::data::{DKGInit, VUFInit, VUFNodeData};
+use rand_beacon::sig_srs::{SigSRSExt, KeypairExt};
+use rand_beacon::keys::NodeExt;
 
 static TOPIC: Lazy<Topic> = Lazy::new(|| Topic::new("dkg"));
 
@@ -54,6 +56,9 @@ static TOPIC: Lazy<Topic> = Lazy::new(|| Topic::new("dkg"));
 pub enum ChannelData{
     Party(Participant::<Bls12_381, BLSSignature<BLSSignatureG1<Bls12_381>>>),
     Share(DKGShare::<Bls12_381, BLSSignature<BLSSignatureG2<Bls12_381>>, BLSSignature<BLSSignatureG1<Bls12_381>>>),
+    AggregationReady(String),
+    VUFReady(String),
+    VUFData(VUFNodeData<Bls12_381>),
 }
 
 #[derive(Clone)]
@@ -63,6 +68,12 @@ pub struct NodeInfo{
     dealer: Option<Dealer<Bls12_381,BLSSignature<BLSSignatureG1<Bls12_381>>>>,
     participants: Option<Vec<Participant::<Bls12_381, BLSSignature<BLSSignatureG1<Bls12_381>>>>>,
     node: Option<Node<Bls12_381, BLSSignature<BLSSignatureG2<Bls12_381>>, BLSSignature<BLSSignatureG1<Bls12_381>>>>,
+    share: Option<DKGShare::<Bls12_381, BLSSignature<BLSSignatureG2<Bls12_381>>, BLSSignature<BLSSignatureG1<Bls12_381>>>>,
+    dkg_pk_share: Option<ark_ec::short_weierstrass_jacobian::GroupAffine<ark_bls12_381::g1::Parameters>>,
+    dkg_sk_share: Option<ark_ec::short_weierstrass_jacobian::GroupAffine<ark_bls12_381::g2::Parameters>>,
+    vuf_init: Option<VUFInit<Bls12_381>>,
+    vuf_keypair: Option<Keypair<Bls12_381>>,
+    vuf_data: Option<VUFNodeData<Bls12_381>>,
 }
 
 // We create a custom network behaviour that combines floodsub and mDNS.
@@ -97,6 +108,9 @@ pub struct NodeBehaviour {
     pub node_list: Vec<PeerId>,
 
     #[behaviour(ignore)]
+    pub nodes_received: Vec<PeerId>,
+
+    #[behaviour(ignore)]
     pub node_extra: NodeInfo,
 }
 
@@ -106,48 +120,11 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour {
         //message is a Vec<u8>
         if let FloodsubEvent::Message(message) = message {
 
-            if let Ok(ps) = Vec::<Participant::<Bls12_381, BLSSignature<BLSSignatureG1<Bls12_381>>>>::deserialize(&*message.data) {
-                if self.state == 2{
-                    println!("Received participants struct from cm "); //some of these are empty???? maybe try serializing BtreeMap version
-                    ps.iter().for_each(|p| println!("{}", p.id));
-                    println!("ps.len()={}", ps.len());
-
-
-                    let node_data = self.node_extra.clone();
-                    let pok = node_data.bls_pok.unwrap();
-                    let sig = node_data.bls_sig.unwrap();
-                    let this_dealer = node_data.dealer.unwrap();
-
-                    let degree: usize = self.dkg_init.dkg_config.degree.clone();
-                    let num_sz: usize = self.dkg_init.num_nodes.clone();
-                    let mut this_node: Node<Bls12_381, BLSSignature<BLSSignatureG2<Bls12_381>>, BLSSignature<BLSSignatureG1<Bls12_381>>> = Node {
-                        aggregator: DKGAggregator {
-                            config: self.dkg_init.dkg_config.clone(),
-                            scheme_pok: pok,
-                            scheme_sig: sig,
-                            participants: ps.clone().into_iter().enumerate().collect(),
-                            transcript: DKGTranscript::empty(degree, num_sz),
-                        },
-                        dealer: this_dealer,
-                    };
-
-                    println!("ps len: {}", this_node.aggregator.participants.len());
-                    let rng = &mut thread_rng();
-                    //let ref_node = &mut this_node;
-                    let share = this_node.share(rng).unwrap();
-                    println!("idss{}", &share.participant_id);
-                    this_node.receive_share_and_decrypt(rng, share.clone()).unwrap();
-                    self.node_extra.node = Some(this_node);
-                    // send out this share to the swarm
-                    stage_channel_data(
-                        self.response_sender.clone(), 
-                        ChannelData::Share(share)
-                    )
-                    
-                }
-            }
-
+            //assume this msg only comes from config manager only
             if let Ok(dkg_init) = DKGInit::<Bls12_381>::deserialize(&*message.data) {
+                println!("rec dkg_init");
+                println!("cm_id: {:?}", self.cm_id);
+                println!("message.source: {:?}", message.source);
                 if self.state == 0 {
                     println!("num_nodes: {}", dkg_init.num_nodes);
                     println!("cm_id: {:?}", message.source);
@@ -204,14 +181,127 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour {
                 }
             }
             
-            
-            //println!("Received: '{:?}' from {:?}",
-            //    String::from_utf8_lossy(&message.data),
-            //    message.source
-            //);
+            if let Ok(ps) = Vec::<Participant::<Bls12_381, BLSSignature<BLSSignatureG1<Bls12_381>>>>::deserialize(&*message.data) {
+                if self.state == 2 && message.source == self.cm_id {
+                    println!("Received participants struct from cm "); //some of these are empty???? 
+                    ps.iter().for_each(|p| println!("{}", p.id));
+                    println!("ps.len()={}", ps.len());
+                    println!("ps[0].id={}", ps[0].id);
+
+                    self.state = 3;
+                    let node_data = self.node_extra.clone();
+                    let pok = node_data.bls_pok.unwrap();
+                    let sig = node_data.bls_sig.unwrap();
+                    let this_dealer = node_data.dealer.unwrap();
+
+                    let degree: usize = self.dkg_init.dkg_config.degree.clone();
+                    let num_sz: usize = self.dkg_init.num_nodes.clone();
+                    let mut this_node: Node<Bls12_381, BLSSignature<BLSSignatureG2<Bls12_381>>, BLSSignature<BLSSignatureG1<Bls12_381>>> = Node {
+                        aggregator: DKGAggregator {
+                            config: self.dkg_init.dkg_config.clone(),
+                            scheme_pok: pok,
+                            scheme_sig: sig,
+                            participants: ps.clone().into_iter().enumerate().collect(),
+                            transcript: DKGTranscript::empty(degree, num_sz),
+                        },
+                        dealer: this_dealer,
+                    };
+                    
+                    let rng = &mut thread_rng();
+                    let share = this_node.share(rng).unwrap();
+                    this_node.receive_share_and_decrypt(rng, share.clone()).unwrap();
+                    self.node_extra.node = Some(this_node);
+                    self.node_extra.share = Some(share);
+
+                    stage_channel_data(
+                        self.response_sender.clone(), 
+                        ChannelData::AggregationReady("Ready to aggregate".to_string())
+                    )
+                    
+                }
+            }
+
+            if let Ok(msg) = serde_json::from_slice::<String>(&message.data) {
+                match msg.as_str() {
+                    "Begin Aggregation" => {
+                        if self.state == 4 && message.source == self.cm_id {
+                            let node_data = self.node_extra.clone();
+                            let node_share = node_data.share.unwrap();
+                            println!("staging dkg share");
+                            stage_channel_data(
+                                self.response_sender.clone(), 
+                                ChannelData::Share(node_share),
+                            );
+                        }
+                    }
+                    _ => {}
+                }
+            }
+
+            //aggregate received DKG share
+            if let Ok(dkg_share) = DKGShare::<Bls12_381, BLSSignature<BLSSignatureG2<Bls12_381>>, BLSSignature<BLSSignatureG1<Bls12_381>>>::deserialize(&*message.data){
+                let received_peer_id: PeerId = message.source;
+                let received_before = self.nodes_received.iter().any(|&p| p == received_peer_id);
+
+                if (self.state == 4 || self.state == 5) && !received_before {
+                    println!("received fresh dkg share");
+                    let rng = &mut thread_rng();
+                    let node_data = self.node_extra.clone();
+                    let mut node = node_data.node.unwrap();
+                    node.receive_share_and_decrypt(rng, dkg_share).unwrap();
+
+                    self.node_extra.node = Some(node.clone());
+                    self.nodes_received.push(received_peer_id);
+                    if self.nodes_received.len() == self.dkg_init.num_nodes{
+                        self.nodes_received = [].to_vec();
+                        println!("getting this node's pk and sk");
+
+                        let pk = node.get_public_key().unwrap();
+                        let sk = node.get_secret_key_share().unwrap();
+                        self.node_extra.dkg_pk_share = Some(pk);
+                        self.node_extra.dkg_sk_share = Some(sk);
+
+                        //send msg to cm, ready to receive vuf_srs
+                        stage_channel_data(
+                          self.response_sender.clone(), 
+                          ChannelData::VUFReady("Ready for VUF".to_string())
+                        )
+                    }
+                }
+            }
+
+            // recv. vuf_srs and message from config manager
+            if let Ok(vuf_init) = VUFInit::<Bls12_381>::deserialize(&*message.data) {
+                if self.state == 6 && message.source == self.cm_id {
+                    let node_pk = self.node_extra.dkg_pk_share.unwrap();
+                    let node_sk = self.node_extra.dkg_sk_share.unwrap();
+                    let vuf_msg = vuf_init.message.clone();
+                    let msg = &vuf_msg[..];
+
+                    let rng = &mut thread_rng();
+                    let this_keypair = Keypair::generate_keypair_from_dkg(rng, vuf_init.vuf_srs.clone(), node_pk, node_sk).unwrap();
+                    let this_proven_pk = this_keypair.prove_key().unwrap();  
+                    let this_signature = this_keypair.sign(&msg[..]).unwrap();
+
+                    self.node_extra.vuf_init = Some(vuf_init.clone());
+                    let vuf_node_data = VUFNodeData{
+                        proven_pk: this_proven_pk,
+                        signature: this_signature,
+                    };
+                    self.node_extra.vuf_keypair = Some(this_keypair);
+                    self.node_extra.vuf_data = Some(vuf_node_data.clone());
+
+                    //send msg to cm, ready to receive vuf_srs
+                    stage_channel_data(
+                        self.response_sender.clone(), 
+                        ChannelData::VUFData(vuf_node_data)
+                    )
+                }
+            }
         }
     }
 }
+
 
 impl NetworkBehaviourEventProcess<MdnsEvent> for NodeBehaviour {
     // Called when `mdns` produces an event.
@@ -282,12 +372,19 @@ async fn main() -> Result<(), Box<dyn Error>>{
             node_id: this_id,
             participant_id: 0,
             node_list: [this_id].to_vec(),
+            nodes_received: [this_id].to_vec(),
             node_extra: NodeInfo{
                 bls_sig: None,
                 bls_pok: None,
                 dealer: None,
                 participants: None,
                 node: None,
+                share: None,
+                dkg_pk_share: None,
+                dkg_sk_share: None,
+                vuf_init: None,
+                vuf_keypair: None,
+                vuf_data: None,
             },
         };
 
@@ -307,14 +404,6 @@ async fn main() -> Result<(), Box<dyn Error>>{
 
     // Listen on all interfaces and whatever port the OS assigns
     swarm.listen_on("/ip4/0.0.0.0/tcp/0".parse()?)?;
-
-    //info!("sending init event");
-    //let sender = swarm.behaviour_mut().response_sender.clone();
-    //tokio::spawn(async move {
-    //    let data = "test".to_string();
-    //    sender.send(data).expect("can send init event"); //-- this needs receive end in tokio select!
-        //swarm.behaviour_mut().floodsub.publish(TOPIC.clone(), "test".as_bytes());
-    //});
   
     loop {
         tokio::select! {
@@ -345,9 +434,21 @@ async fn main() -> Result<(), Box<dyn Error>>{
                         println!("participant is going to be sent");
                         send_participant(participant, &mut swarm).await;
                     }
+                    Some(ChannelData::AggregationReady(msg)) => {
+                        println!("AggregationReady msg going to be sent");
+                        send_message(msg, &mut swarm, 3, 4).await;
+                    }
                     Some(ChannelData::Share(dkg_share)) => {
                         println!("dkg_share going to be sent");
                         send_dkg_share(dkg_share, &mut swarm).await;
+                    }
+                    Some(ChannelData::VUFReady(msg)) => {
+                        println!("ready for vuf going to be sent");
+                        send_message(msg, &mut swarm, 5, 6).await; //needs to be in state 4 or 5
+                    }
+                    Some(ChannelData::VUFData(vuf_node_data)) => {
+                        println!("proven pk and sig going to be sent");
+                        send_vuf_data(vuf_node_data, &mut swarm).await; //needs to be in state 4 or 5
                     }
                     _ => {}
                 }
@@ -363,7 +464,6 @@ async fn main() -> Result<(), Box<dyn Error>>{
     }
     
 }
-
 
 async fn list_peers(swarm: &mut Swarm<NodeBehaviour>) -> Vec<Vec<u8>>{
     println!("Discovered Peers:");
@@ -400,7 +500,7 @@ async fn init_dkg(connected_peers: Vec<Vec<u8>>, swarm: &mut Swarm<NodeBehaviour
     let rng = &mut thread_rng();
     let dkg_srs = DkgSRS::<Bls12_381>::setup(rng).unwrap();
     let u_1 = G2Projective::rand(rng).into_affine();
-    let degree = 3;
+    let degree = 2;
 
     let dkg_config = Config {
         srs: dkg_srs.clone(),
@@ -442,6 +542,23 @@ async fn send_participant(
     }
 }
 
+async fn send_message(
+    msg: String,
+    swarm: &mut Swarm<NodeBehaviour>,
+    start_state: usize,
+    end_state: usize
+){
+    let behaviour = swarm.behaviour_mut();
+    let json_data = serde_json::to_string(&msg).expect("Can't serialize to json!");
+    
+    println!("current node state ={}", behaviour.state);
+    if behaviour.state == start_state {
+        println!("going to be published to the network: {}", msg);
+        behaviour.floodsub.publish(TOPIC.clone(), json_data.as_bytes());
+        behaviour.state = end_state;
+    }
+}
+
 async fn send_dkg_share(
     share: DKGShare::<Bls12_381, BLSSignature<BLSSignatureG2<Bls12_381>>, BLSSignature<BLSSignatureG1<Bls12_381>>>,
     swarm: &mut Swarm<NodeBehaviour>
@@ -453,8 +570,26 @@ async fn send_dkg_share(
     let buf_ref = buffer.by_ref();
     let _ = share.serialize(buf_ref);
     
-    if behaviour.state == 3 {
+    //these states need to be changed
+    if behaviour.state == 4 {
         behaviour.floodsub.publish(TOPIC.clone(), buffer);
-        behaviour.state = 4;
+        behaviour.state = 5;
+    }
+}
+
+async fn send_vuf_data(
+    vuf_data: VUFNodeData<Bls12_381>,
+    swarm: &mut Swarm<NodeBehaviour>
+){
+    let behaviour = swarm.behaviour_mut();
+
+    let sz = vuf_data.serialized_size();
+    let mut buffer = Vec::with_capacity(sz); 
+    let buf_ref = buffer.by_ref();
+    let _ = vuf_data.serialize(buf_ref);
+    
+    if behaviour.state == 6 {
+        behaviour.floodsub.publish(TOPIC.clone(), buffer);
+        behaviour.state = 7;
     }
 }

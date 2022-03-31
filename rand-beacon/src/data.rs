@@ -26,8 +26,6 @@ use ark_serialize::*;
 use ark_serialize::Write;
 use std::marker::PhantomData;
 use rand::{thread_rng};
-use libp2p::PeerId;
-
 
 #[derive(CanonicalSerialize, CanonicalDeserialize, Clone)]
 pub struct DKGInit<E: PairingEngine> {
@@ -36,9 +34,27 @@ pub struct DKGInit<E: PairingEngine> {
     pub dkg_config: Config<E>,
 }
 
+#[derive(CanonicalSerialize, CanonicalDeserialize, Clone)]
+pub struct VUFInit<E: PairingEngine> {
+    pub vuf_srs: SigSRS<E>,
+    pub message: Vec<u8>,
+}
+
+#[derive(CanonicalSerialize, CanonicalDeserialize, Clone)]
+pub struct VUFNodeData<E: PairingEngine> {
+    pub proven_pk: ProvenPublicKey<E>,
+    pub signature: Signature<E>,
+}
+
+#[derive(CanonicalSerialize, CanonicalDeserialize, Clone)]
+pub struct VUFNodesData<E: PairingEngine> {
+    pub proven_pks: Vec<ProvenPublicKey<E>>,
+    pub signatures: Vec<Signature<E>>,
+}
+
 impl Default for DKGInit<Bls12_381>{
 
-    //init with dummy data - CHANGE THIS TO OPTION ENUM
+    //init with dummy data - CHANGE THIS TO OPTION ENUM and remove this default()
     fn default() -> DKGInit<Bls12_381> {
         let rng = &mut thread_rng();
         let dkg_srs = DkgSRS::<Bls12_381>::setup(rng).unwrap();

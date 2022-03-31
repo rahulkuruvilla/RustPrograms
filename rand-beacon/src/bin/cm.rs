@@ -21,15 +21,15 @@ use aggregatable_dkg::{
     },
 };
 use ark_bls12_381::{Bls12_381, G2Projective};
-use ark_ec::{ProjectiveCurve, PairingEngine};
-use ark_ff::{UniformRand, Zero};
+use ark_ec::ProjectiveCurve;
+use ark_ff::UniformRand;
 use ark_serialize::*;
 use rand::{thread_rng};
 use std::{
     error::Error,
     collections::HashSet,
-    marker::PhantomData,
     time::{SystemTime, UNIX_EPOCH},
+    env,
 };
 
 // libp2p imports--------------------------------------------------------
@@ -47,15 +47,19 @@ use libp2p::{
 };
 use log::{error, info};
 use once_cell::sync::Lazy;
-use tokio::{fs, io::AsyncBufReadExt, sync::mpsc};
+use tokio::{io::AsyncBufReadExt, sync::mpsc};
+//use sha2::{Sha256, Digest};
 
-use rand_beacon::data::DKGInit;
+use rand_beacon::data::{DKGInit, VUFInit, VUFNodeData, VUFNodesData};
+use rand_beacon::sig_srs::{SigSRSExt, KeypairExt};
 
 static TOPIC: Lazy<Topic> = Lazy::new(|| Topic::new("dkg"));
 
 // data that gets sent to main loop
 pub enum ChannelData{
     Participants(Vec<Participant::<Bls12_381, BLSSignature<BLSSignatureG1<Bls12_381>>>>),
+    StartAggregation(String),
+    VUFData(VUFInit<Bls12_381>),
     Empty,
 }
 
@@ -65,7 +69,7 @@ pub enum ChannelData{
 // the events of each behaviour.
 #[derive(NetworkBehaviour)]
 #[behaviour(event_process = true)]
-pub struct NodeBehaviour<E: PairingEngine> {
+pub struct NodeBehaviour {
     pub floodsub: Floodsub,
     pub mdns: Mdns,
 
@@ -76,7 +80,7 @@ pub struct NodeBehaviour<E: PairingEngine> {
     pub state: usize,
 
     #[behaviour(ignore)]
-    pub dkg_init: DKGInit<E>,
+    pub dkg_init: DKGInit<Bls12_381>,       //USE OPTION ENUM HERE AND REMOVE DEFAULT() TRAIT/pass in n,t
 
     #[behaviour(ignore)]
     pub cm_id: PeerId,
@@ -94,12 +98,16 @@ pub struct NodeBehaviour<E: PairingEngine> {
     pub nodes_received: Vec<PeerId>,
 
     #[behaviour(ignore)]
-    //pub participants: ParticipantsData,
-    pub participants: Option<Vec<Participant::<Bls12_381, BLSSignature<BLSSignatureG1<Bls12_381>>>>>
-    //pub participants: CMData,
+    pub participants: Option<Vec<Participant::<Bls12_381, BLSSignature<BLSSignatureG1<Bls12_381>>>>>,
+
+    #[behaviour(ignore)]
+    pub vuf_data: Option<VUFInit::<Bls12_381>>,
+
+    #[behaviour(ignore)]
+    pub vuf_sigs_pks: VUFNodesData::<Bls12_381>,
 }
 
-impl<E: PairingEngine> NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour<E> {
+impl NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour{
     // Called when `floodsub` produces an event.
     fn inject_event(&mut self, message: FloodsubEvent) {
         //message is a Vec<u8>
@@ -122,13 +130,10 @@ impl<E: PairingEngine> NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehav
                             ps_updated.sort_by(|a, b| a.id.cmp(&b.id));
                             ps_updated.iter().for_each(|p| println!("{}", p.id)); 
                             self.participants = Some(ps_updated.clone());
-                            //self.nodes_received.push(received_peer_id);
                             
                             // check if received all participants structs from all nodes
-                            //println!("\n{} {}", &self.nodes_received.len(), &self.dkg_init.num_nodes);
+                            println!("\n{} {}", &self.nodes_received.len(), &self.dkg_init.num_nodes);
                             if self.nodes_received.len() == self.dkg_init.num_nodes{
-                                //print ps here + sort ps here
-                                //p.sort_by(|a, b| b.age.cmp(&a.age));
 
                                 self.nodes_received = [].to_vec();
                                 stage_channel_data(
@@ -147,13 +152,103 @@ impl<E: PairingEngine> NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehav
                     }
                 }
             }
+
+            if let Ok(msg) = serde_json::from_slice::<String>(&message.data) {
+                let received_peer_id: PeerId = message.source;
+                let received_before = self.nodes_received.iter().any(|&p| p == received_peer_id);
+                match msg.as_str() {
+                    "Ready to aggregate" => {
+                        if self.state == 2 && !received_before {
+                            self.nodes_received.push(received_peer_id);
+                            if self.nodes_received.len() == self.dkg_init.num_nodes{
+                                self.nodes_received = [].to_vec();
+                                stage_channel_data(
+                                    self.response_sender.clone(), 
+                                    ChannelData::StartAggregation("Begin Aggregation".to_string()),
+                                );
+                            }
+                        }
+
+                    }
+                    "Ready for VUF" => {
+                        if self.state == 3 && !received_before {
+                            self.nodes_received.push(received_peer_id);
+                            if self.nodes_received.len() == self.dkg_init.num_nodes{
+                                self.nodes_received = [].to_vec();
+
+                                let rng = &mut thread_rng();
+                                let dkg_srs = self.dkg_init.dkg_config.srs.clone();
+                                let vuf_srs = SigSRS::<Bls12_381>::setup_from_dkg(rng, dkg_srs.clone()).unwrap();
+                                let vuf_msg = b"hello";
+                                let vuf_init = VUFInit {
+                                    vuf_srs: vuf_srs,
+                                    message: vuf_msg.to_vec(),
+                                };
+                                self.vuf_data = Some(vuf_init.clone());
+
+                                stage_channel_data(
+                                    self.response_sender.clone(), 
+                                    ChannelData::VUFData(vuf_init),
+                                );
+                            }
+                        }
+                    }
+                    _ => {}
+                }
+            }
+
+            if let Ok(node_sig) = VUFNodeData::<Bls12_381>::deserialize(&*message.data) {
+                let cm_vuf_data = self.vuf_data.clone();
+                let vuf_data = cm_vuf_data.unwrap();
+                let vuf_msg = vuf_data.message;
+                let msg = &vuf_msg[..];
+
+                let this_proven_pk = node_sig.proven_pk;
+                let this_sig = node_sig.signature;
+
+                this_proven_pk.verify().unwrap();
+                this_sig.verify_and_derive(this_proven_pk.clone(), &msg[..]).unwrap();
+
+                let mut current_proven_pks = self.vuf_sigs_pks.proven_pks.clone();
+                let mut current_sigs = self.vuf_sigs_pks.signatures.clone();
+                current_sigs.push(this_sig);
+                current_proven_pks.push(this_proven_pk); 
+                self.vuf_sigs_pks.signatures = current_sigs.clone();
+                self.vuf_sigs_pks.proven_pks = current_proven_pks.clone();
+
+                // threshold of signatures reached
+                let threshold = self.dkg_init.dkg_config.degree;
+                if self.vuf_sigs_pks.signatures.len() == threshold{
+
+                    let vuf_srs = vuf_data.vuf_srs;
+                    let aggregated_pk = ProvenPublicKey::aggregate(&current_proven_pks[0..threshold], vuf_srs.clone()).unwrap();
+                    let aggregated_sig = Signature::aggregate(&current_sigs[0..threshold]).unwrap();
+
+                    aggregated_sig.verify_and_derive(aggregated_pk, msg).unwrap();
+
+                    let sz = aggregated_sig.serialized_size();
+                    let mut buffer = Vec::with_capacity(sz); 
+                    let buf_ref = buffer.by_ref();
+                    let _ = aggregated_sig.serialize(buf_ref);
+
+                    /*
+                    let mut hasher = Sha256::new();
+                    hasher.update(&buffer);
+                    let result = hasher.finalize();
+                    println!("sha256(sigma)= {:?}", result);
+                    */
+                }
+
+            }
+
+
         }
     }
         
 }
 
 
-impl<E: PairingEngine> NetworkBehaviourEventProcess<MdnsEvent> for NodeBehaviour<E> {
+impl NetworkBehaviourEventProcess<MdnsEvent> for NodeBehaviour {
     // Called when `mdns` produces an event.
     fn inject_event(&mut self, event: MdnsEvent) {
         match event {
@@ -184,6 +279,12 @@ fn stage_channel_data(sender: mpsc::UnboundedSender<ChannelData>, data: ChannelD
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>>{
     pretty_env_logger::init();
+    let args: Vec<String> = env::args().collect();
+    let t = &args[1];
+    let n = &args[2];
+    let degree: usize = t.parse().unwrap();
+    let num_nodes: usize = n.parse().unwrap();
+
 
     let id_keys = identity::Keypair::generate_ed25519();
     let peer_id = PeerId::from(id_keys.public());
@@ -212,7 +313,7 @@ async fn main() -> Result<(), Box<dyn Error>>{
     let this_id = peer_id.clone();
     let mut swarm = {
         let mdns = Mdns::new(Default::default()).await?;
-        let mut behaviour = NodeBehaviour::<Bls12_381> {
+        let mut behaviour = NodeBehaviour {
             floodsub: Floodsub::new(peer_id.clone()),
             mdns,
             response_sender,
@@ -224,6 +325,11 @@ async fn main() -> Result<(), Box<dyn Error>>{
             node_list: [this_id].to_vec(),
             nodes_received: [].to_vec(),
             participants: None,
+            vuf_data: None,
+            vuf_sigs_pks: VUFNodesData {
+                proven_pks: [].to_vec(),
+                signatures: [].to_vec(),
+            },
         };
 
         behaviour.floodsub.subscribe(TOPIC.clone());
@@ -260,7 +366,7 @@ async fn main() -> Result<(), Box<dyn Error>>{
                 //swarm.behaviour_mut().floodsub.publish(TOPIC.clone(), line.as_bytes());
                 if line == "start"{
                     let peers = handle_list_peers(&mut swarm).await;
-                    init_dkg(peers, &mut swarm).await;
+                    init_dkg(degree, num_nodes, peers, &mut swarm).await;
                 }else if line == "check"{
                     check_state(&mut swarm).await;
                 }else if line == "ls"{
@@ -280,6 +386,14 @@ async fn main() -> Result<(), Box<dyn Error>>{
                         println!("participants being sent to nodes");
                         send_participants(participants, &mut swarm).await;
                     }
+                    Some(ChannelData::StartAggregation(msg)) => {
+                        println!("start agg. msg being sent to nodes");
+                        send_message(msg, &mut swarm, 2, 3).await;
+                    }
+                    Some(ChannelData::VUFData(vuf_init)) => {
+                        println!("vuf_init data being sent to nodes");
+                        send_vuf_init(vuf_init, &mut swarm).await;
+                    }
                     _ => {}
                 }
             }
@@ -296,7 +410,7 @@ async fn main() -> Result<(), Box<dyn Error>>{
 }
 
 
-async fn handle_list_peers(swarm: &mut Swarm<NodeBehaviour<Bls12_381>>) -> Vec<Vec<u8>>{
+async fn handle_list_peers(swarm: &mut Swarm<NodeBehaviour>) -> Vec<Vec<u8>>{
     println!("Discovered Peers:");
     let nodes = swarm.behaviour().mdns.discovered_nodes();
     let mut bytes = vec![];
@@ -312,7 +426,7 @@ async fn handle_list_peers(swarm: &mut Swarm<NodeBehaviour<Bls12_381>>) -> Vec<V
 }
 
 // for debugging purposes
-async fn check_state<E: PairingEngine>(swarm: &mut Swarm<NodeBehaviour<E>>) {
+async fn check_state(swarm: &mut Swarm<NodeBehaviour>) {
     println!("Checking state");
     let behaviour = swarm.behaviour_mut();
     println!("This node's state is {}", behaviour.state);
@@ -320,18 +434,21 @@ async fn check_state<E: PairingEngine>(swarm: &mut Swarm<NodeBehaviour<E>>) {
 
 
 // cm runs this when all nodes connected
-async fn init_dkg(connected_peers: Vec<Vec<u8>>, swarm: &mut Swarm<NodeBehaviour<Bls12_381>>){
+async fn init_dkg(
+    degree: usize, 
+    num_nodes: usize, 
+    connected_peers: Vec<Vec<u8>>, 
+    swarm: &mut Swarm<NodeBehaviour>
+){
     let behaviour = swarm.behaviour_mut();
     if behaviour.state != 0 {
         return
     }
 
     println!("This config manager is starting the DKG!");
-    let num_nodes: usize = 2; 
     let rng = &mut thread_rng();
     let dkg_srs = DkgSRS::<Bls12_381>::setup(rng).unwrap();
     let u_1 = G2Projective::rand(rng).into_affine();
-    let degree = 2;
 
     let dkg_config = Config {
         srs: dkg_srs.clone(),
@@ -351,6 +468,8 @@ async fn init_dkg(connected_peers: Vec<Vec<u8>>, swarm: &mut Swarm<NodeBehaviour
     let _ = cm_dkg_init.serialize(buf_ref);
     
     behaviour.floodsub.publish(TOPIC.clone(), buffer);
+    println!("published");
+
     behaviour.state = 1;
     behaviour.dkg_init = cm_dkg_init;
 
@@ -358,7 +477,7 @@ async fn init_dkg(connected_peers: Vec<Vec<u8>>, swarm: &mut Swarm<NodeBehaviour
 
 async fn send_participants(
     participants: Vec<Participant::<Bls12_381, BLSSignature<BLSSignatureG1<Bls12_381>>>>, 
-    swarm: &mut Swarm<NodeBehaviour<Bls12_381>>
+    swarm: &mut Swarm<NodeBehaviour>
 ){
     let behaviour = swarm.behaviour_mut();
 
@@ -366,15 +485,42 @@ async fn send_participants(
     let mut buffer = Vec::with_capacity(sz); 
     let buf_ref = buffer.by_ref();
     let _ = participants.serialize(buf_ref);
-
-    //CHECK IF DESERIALISATION WORKS !!!
-    if let Ok(ps) =  Vec::<Participant::<ark_ec::bls12::Bls12<ark_bls12_381::Parameters>, aggregatable_dkg::signature::bls::BLSSignature<aggregatable_dkg::signature::bls::BLSSignatureG1<ark_ec::bls12::Bls12<ark_bls12_381::Parameters>>>>>::deserialize(&*buffer){
-        println!("deserialization, ps.len()={}, ps[1].state={}", ps.len(), ps[1].state)
-    }
     
     if behaviour.state == 1 {
         behaviour.floodsub.publish(TOPIC.clone(), buffer);
         behaviour.state = 2;
         println!("published");
+    }
+}
+
+async fn send_message(
+    msg: String,
+    swarm: &mut Swarm<NodeBehaviour>,
+    start_state: usize,
+    end_state: usize
+){
+    let behaviour = swarm.behaviour_mut();
+    let json_data = serde_json::to_string(&msg).expect("Can't serialize to json!");
+    
+    if behaviour.state == start_state {
+        behaviour.floodsub.publish(TOPIC.clone(), json_data.as_bytes());
+        behaviour.state = end_state;
+    }
+}
+
+async fn send_vuf_init(
+    vuf_init: VUFInit<Bls12_381>,
+    swarm: &mut Swarm<NodeBehaviour>,
+){
+    let behaviour = swarm.behaviour_mut();
+    
+    let sz = vuf_init.serialized_size();
+    let mut buffer = Vec::with_capacity(sz); 
+    let buf_ref = buffer.by_ref();
+    let _ = vuf_init.serialize(buf_ref);
+    
+    if behaviour.state == 3{
+        behaviour.floodsub.publish(TOPIC.clone(), buffer);
+        behaviour.state = 4;
     }
 }
