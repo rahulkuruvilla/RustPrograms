@@ -28,14 +28,14 @@ use rand::{thread_rng};
 use std::{
     error::Error,
     collections::HashSet,
-    time::{SystemTime, UNIX_EPOCH},
+    time::Instant,
     env,
 };
 
 // libp2p imports--------------------------------------------------------
 use libp2p::{
     core::upgrade,
-    floodsub::{self, Floodsub, FloodsubEvent, Topic},
+    floodsub::{Floodsub, FloodsubEvent, Topic},
     futures::StreamExt,
     identity,
     mdns::{Mdns, MdnsEvent},
@@ -51,7 +51,7 @@ use tokio::{io::AsyncBufReadExt, sync::mpsc};
 //use sha2::{Sha256, Digest};
 
 use rand_beacon::data::{DKGInit, VUFInit, VUFNodeData, VUFNodesData};
-use rand_beacon::sig_srs::{SigSRSExt, KeypairExt};
+use rand_beacon::sig_srs::SigSRSExt;
 
 static TOPIC: Lazy<Topic> = Lazy::new(|| Topic::new("dkg"));
 
@@ -78,6 +78,9 @@ pub struct NodeBehaviour {
 
     #[behaviour(ignore)]
     pub state: usize,
+
+    #[behaviour(ignore)]
+    pub start_time: Option<Instant>,
 
     #[behaviour(ignore)]
     pub dkg_init: DKGInit<Bls12_381>,       //USE OPTION ENUM HERE AND REMOVE DEFAULT() TRAIT/pass in n,t
@@ -198,6 +201,7 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour{
             }
 
             if let Ok(node_sig) = VUFNodeData::<Bls12_381>::deserialize(&*message.data) {
+                println!("Received signature and proven pk from node!");
                 let cm_vuf_data = self.vuf_data.clone();
                 let vuf_data = cm_vuf_data.unwrap();
                 let vuf_msg = vuf_data.message;
@@ -230,6 +234,7 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour{
                     let mut buffer = Vec::with_capacity(sz); 
                     let buf_ref = buffer.by_ref();
                     let _ = aggregated_sig.serialize(buf_ref);
+                    println!("sigma={:?}", &buffer);
 
                     /*
                     let mut hasher = Sha256::new();
@@ -237,6 +242,11 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour{
                     let result = hasher.finalize();
                     println!("sha256(sigma)= {:?}", result);
                     */
+
+                    let start_time = self.start_time.clone();
+                    let this_start_time = start_time.unwrap();
+                    let elapsed = this_start_time.elapsed();
+                    println!("Total time taken: {:?}", elapsed);
                 }
 
             }
@@ -318,6 +328,7 @@ async fn main() -> Result<(), Box<dyn Error>>{
             mdns,
             response_sender,
             state,
+            start_time: None,
             dkg_init,
             cm_id: this_id,
             node_id: this_id,
@@ -348,14 +359,6 @@ async fn main() -> Result<(), Box<dyn Error>>{
 
     // Listen on all interfaces and whatever port the OS assigns
     swarm.listen_on("/ip4/0.0.0.0/tcp/0".parse()?)?;
-
-    //info!("sending init event");
-    //let sender = swarm.behaviour_mut().response_sender.clone();
-    //tokio::spawn(async move {
-    //    let data = "test".to_string();
-    //    sender.send(data).expect("can send init event"); //-- this needs receive end in tokio select!
-        //swarm.behaviour_mut().floodsub.publish(TOPIC.clone(), "test".as_bytes());
-    //});
   
     loop {
         tokio::select! {
@@ -365,6 +368,8 @@ async fn main() -> Result<(), Box<dyn Error>>{
                 println!("line: {:?}", &line);
                 //swarm.behaviour_mut().floodsub.publish(TOPIC.clone(), line.as_bytes());
                 if line == "start"{
+                    let start = Instant::now();
+                    swarm.behaviour_mut().start_time = Some(start);
                     let peers = handle_list_peers(&mut swarm).await;
                     init_dkg(degree, num_nodes, peers, &mut swarm).await;
                 }else if line == "check"{
@@ -421,6 +426,7 @@ async fn handle_list_peers(swarm: &mut Swarm<NodeBehaviour>) -> Vec<Vec<u8>>{
 
     let all_nodes = Vec::from_iter(unique_peers);
     println!("{:?}", all_nodes);
+    println!("Connected to {:?} Nodes!", all_nodes.len());
     all_nodes.iter().for_each(|p| bytes.push(p.to_bytes())); 
     bytes
 }

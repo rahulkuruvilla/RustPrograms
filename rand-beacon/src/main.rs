@@ -21,7 +21,7 @@ use aggregatable_dkg::{
     },
 };
 use ark_bls12_381::{Bls12_381, G2Projective};
-use ark_ec::{ProjectiveCurve, PairingEngine};
+use ark_ec::ProjectiveCurve;
 use ark_ff::{UniformRand, Zero};
 use ark_serialize::*;
 use rand::{thread_rng};
@@ -30,7 +30,7 @@ use std::marker::PhantomData;
 // libp2p imports--------------------------------------------------------
 use libp2p::{
     core::upgrade,
-    floodsub::{self, Floodsub, FloodsubEvent, Topic},
+    floodsub::{Floodsub, FloodsubEvent, Topic},
     futures::StreamExt,
     identity,
     mdns::{Mdns, MdnsEvent},
@@ -44,7 +44,7 @@ use log::{error, info};
 use std::error::Error;
 use std::collections::HashSet;
 use once_cell::sync::Lazy;
-use tokio::{fs, io::AsyncBufReadExt, sync::mpsc};
+use tokio::{io::AsyncBufReadExt, sync::mpsc};
 
 use rand_beacon::data::{DKGInit, VUFInit, VUFNodeData};
 use rand_beacon::sig_srs::{SigSRSExt, KeypairExt};
