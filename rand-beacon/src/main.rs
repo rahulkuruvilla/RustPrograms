@@ -17,7 +17,12 @@ use aggregatable_dkg::{
     signature::{
         bls::{srs::SRS as BLSSRS, BLSSignature, BLSSignatureG1, BLSSignatureG2},
         scheme::SignatureScheme,
-        algebraic::{keypair::Keypair, public_key::ProvenPublicKey, signature::Signature, srs::SRS as SigSRS}, //srs as SigSRS
+        algebraic::{
+            keypair::Keypair, 
+            public_key::ProvenPublicKey, 
+            signature::Signature, 
+            srs::SRS as SigSRS
+        },
     },
 };
 use ark_bls12_381::{Bls12_381, G2Projective};
@@ -157,7 +162,8 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour {
 
                     let rng = &mut thread_rng();
                     let dealer_keypair_sig = bls_sig.generate_keypair(rng).unwrap();
-                    let participant = Participant::<Bls12_381, BLSSignature<BLSSignatureG1<Bls12_381>>> {
+                    let participant = Participant::<Bls12_381, 
+                        BLSSignature<BLSSignatureG1<Bls12_381>>> {
                         pairing_type: PhantomData,
                         id: self.participant_id,               //cm gets list and sends it out with dkg_init
                         public_key_sig: dealer_keypair_sig.1,
@@ -181,9 +187,10 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour {
                 }
             }
             
-            if let Ok(ps) = Vec::<Participant::<Bls12_381, BLSSignature<BLSSignatureG1<Bls12_381>>>>::deserialize(&*message.data) {
+            if let Ok(ps) = Vec::<Participant::<Bls12_381, 
+                BLSSignature<BLSSignatureG1<Bls12_381>>>>::deserialize(&*message.data) {
                 if self.state == 2 && message.source == self.cm_id {
-                    println!("Received participants struct from cm "); //some of these are empty???? 
+                    println!("Received participants struct from cm "); 
                     ps.iter().for_each(|p| println!("{}", p.id));
                     println!("ps.len()={}", ps.len());
                     println!("ps[0].id={}", ps[0].id);
@@ -196,7 +203,8 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour {
 
                     let degree: usize = self.dkg_init.dkg_config.degree.clone();
                     let num_sz: usize = self.dkg_init.num_nodes.clone();
-                    let mut this_node: Node<Bls12_381, BLSSignature<BLSSignatureG2<Bls12_381>>, BLSSignature<BLSSignatureG1<Bls12_381>>> = Node {
+                    let mut this_node: Node<Bls12_381, BLSSignature<BLSSignatureG2<Bls12_381>>, 
+                        BLSSignature<BLSSignatureG1<Bls12_381>>> = Node {
                         aggregator: DKGAggregator {
                             config: self.dkg_init.dkg_config.clone(),
                             scheme_pok: pok,
@@ -239,10 +247,12 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour {
             }
 
             //aggregate received DKG share
-            if let Ok(dkg_share) = DKGShare::<Bls12_381, BLSSignature<BLSSignatureG2<Bls12_381>>, BLSSignature<BLSSignatureG1<Bls12_381>>>::deserialize(&*message.data){
+            if let Ok(dkg_share) = DKGShare::<Bls12_381, BLSSignature<BLSSignatureG2<Bls12_381>>, 
+                    BLSSignature<BLSSignatureG1<Bls12_381>>>::deserialize(&*message.data){
                 let received_peer_id: PeerId = message.source;
                 let received_before = self.nodes_received.iter().any(|&p| p == received_peer_id);
 
+                println!("current state={}", self.state);
                 if (self.state == 4 || self.state == 5) && !received_before {
                     println!("received fresh dkg share");
                     let rng = &mut thread_rng();
@@ -400,29 +410,33 @@ async fn main() -> Result<(), Box<dyn Error>>{
     };
 
     // Read full lines from stdin
-    let mut stdin = tokio::io::BufReader::new(tokio::io::stdin()).lines();
+    //let mut stdin = tokio::io::BufReader::new(tokio::io::stdin()).lines();
 
     // Listen on all interfaces and whatever port the OS assigns
     swarm.listen_on("/ip4/0.0.0.0/tcp/0".parse()?)?;
   
     loop {
         tokio::select! {
-            //received from stdin
-            line = stdin.next_line() => {
+            //received from stdin 
+            /*line = stdin.next_line() => {
                 let line = line?.expect("stdin closed");
                 println!("line: {:?}", &line);
                 //swarm.behaviour_mut().floodsub.publish(TOPIC.clone(), line.as_bytes());
-                if line == "check"{
-                    check_state(&mut swarm).await;
-                }else if line == "ls"{
-                    list_peers(&mut swarm).await;
+                match line.as_str(){
+                    "check" => {
+                        check_state(&mut swarm).await;
+                    },
+                    "ls" => {
+                        list_peers(&mut swarm).await;
+                    },
+                    _ => {},
                 }
-            }
+            }*/
             
             // received from the channel
             response = response_rcv.recv() => {
                 //let json = serde_json::to_string(&response).expect("can jsonify response");
-                println!("received");
+                println!("received data on channel");
                 //swarm.behaviour_mut().floodsub.publish(TOPIC.clone(), json.into_bytes());
 
                 //match on 
@@ -445,7 +459,7 @@ async fn main() -> Result<(), Box<dyn Error>>{
                     }
                     Some(ChannelData::VUFData(vuf_node_data)) => {
                         println!("proven pk and sig going to be sent");
-                        send_vuf_data(vuf_node_data, &mut swarm).await; //needs to be in state 4 or 5
+                        send_vuf_data(vuf_node_data, &mut swarm).await;
                     }
                     _ => {}
                 }
@@ -530,8 +544,10 @@ async fn send_dkg_share(
     let _ = share.serialize(buf_ref);
     
     //these states need to be changed
+    println!("state before sending dkg share out (should be 4): {}", behaviour.state);
     if behaviour.state == 4 {
         behaviour.floodsub.publish(TOPIC.clone(), buffer);
+        println!("dkg share sent out");
         behaviour.state = 5;
     }
 }
@@ -549,6 +565,5 @@ async fn send_vuf_data(
     
     if behaviour.state == 6 {
         behaviour.floodsub.publish(TOPIC.clone(), buffer);
-        behaviour.state = 7;
     }
 }

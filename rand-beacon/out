@@ -1,0 +1,945 @@
+Starting node 1
+Starting node 2
+Starting node 3
+Starting node 4
+Starting node 5
+Starting node 6
+Starting node 7
+Starting node 8
+Starting node 9
+Starting node 10
+Starting node 11
+Starting node 12
+Starting node 13
+Starting node 14
+Starting node 15
+Starting node 16
+done
+Local peer id: PeerId("12D3KooWDYvfXpmHiPrXQcxK1eiDHxS1ZywAaefoP85gyGR9tm4S")
+Local peer id: PeerId("12D3KooWBMBcZgyggDZzvPyfRtLM3wEFRKV8acEvWW4Ucwz4XYNf")
+Listening on "/ip4/192.168.1.6/tcp/60510"
+Listening on "/ip4/127.0.0.1/tcp/60510"
+Listening on "/ip4/192.168.1.6/tcp/60511"
+Listening on "/ip4/127.0.0.1/tcp/60511"
+Local peer id: PeerId("12D3KooWEJ7PcdgRxhmRFgASYqdLAkvDY2tmpNbnt2X1QaD4VfXp")
+Local peer id: PeerId("12D3KooWEbMPvowgsS2kkgHiv2Hk1L4fdMWByTq65AYZceGxt4iF")
+Listening on "/ip4/127.0.0.1/tcp/60513"
+Listening on "/ip4/192.168.1.6/tcp/60513"
+Local peer id: PeerId("12D3KooWLVqJwSUknkpTL6JrFWxHXi8AGyFbjoSeBHPtJa59YP7m")
+Local peer id: PeerId("12D3KooWSjS1D8jMSMCj4dwSEK8XbnYYKP36BgNQj6Ffg6bFaMwf")
+Local peer id: PeerId("12D3KooWJvac73VjexcPztwsyfx861vgxwu1GvoBYq7NRkwF8jzX")
+Listening on "/ip4/127.0.0.1/tcp/60514"
+Listening on "/ip4/192.168.1.6/tcp/60514"
+Listening on "/ip4/192.168.1.6/tcp/60515"
+Listening on "/ip4/127.0.0.1/tcp/60515"
+Listening on "/ip4/192.168.1.6/tcp/60517"
+Listening on "/ip4/127.0.0.1/tcp/60517"
+Listening on "/ip4/192.168.1.6/tcp/60516"
+Listening on "/ip4/127.0.0.1/tcp/60516"
+Local peer id: PeerId("12D3KooWNKAnzcnDpxWtrou6WPDG2diwvzBnwwZAjYvDQ66dY8fk")
+Local peer id: PeerId("12D3KooWCrjf5ZgKTRZYj24bwPzkgSnyaZXmUWWPMCagfWrj67H4")
+Local peer id: PeerId("12D3KooWAbjV9VzW3WjWnnRniZYs29YRRb6uhFwtWsEdWCzyZnXy")
+Listening on "/ip4/192.168.1.6/tcp/60543"
+Listening on "/ip4/127.0.0.1/tcp/60543"
+Listening on "/ip4/192.168.1.6/tcp/60544"
+Listening on "/ip4/127.0.0.1/tcp/60544"
+Listening on "/ip4/127.0.0.1/tcp/60564"
+Listening on "/ip4/192.168.1.6/tcp/60564"
+Local peer id: PeerId("12D3KooWE8e9YM82BDWzAEe39eyz8XYZJ7snURQJXR24rwVQh2C8")
+Listening on "/ip4/192.168.1.6/tcp/60577"
+Listening on "/ip4/127.0.0.1/tcp/60577"
+Local peer id: PeerId("12D3KooWQ1ZE52kyY6952YLiwF6TYrdUgvzoCrsYyp8CyEb6dKsN")
+Local peer id: PeerId("12D3KooWMRhcMkxJqbp7CscHmN29oNg1vuvN3MoLmJqLBSyLn5yE")
+Local peer id: PeerId("12D3KooWFJYEK7af6fJgnLpQfLhXULixuTPUKXYGzqPdW2TftKsm")
+Listening on "/ip4/127.0.0.1/tcp/60589"
+Listening on "/ip4/192.168.1.6/tcp/60589"
+Listening on "/ip4/127.0.0.1/tcp/60594"
+Listening on "/ip4/192.168.1.6/tcp/60594"
+Listening on "/ip4/127.0.0.1/tcp/60610"
+Listening on "/ip4/192.168.1.6/tcp/60610"
+Local peer id: PeerId("12D3KooWCGM2ZbHagFgLMBVQWjtepuxRxN6B8xftucnAqoCi6Zgn")
+Local peer id: PeerId("12D3KooWBEPnLpUTx2ZEWDuR2gX5MFtKrT3M4cKZErPWcky5TcZQ")
+Listening on "/ip4/192.168.1.6/tcp/60645"
+Listening on "/ip4/127.0.0.1/tcp/60645"
+Listening on "/ip4/192.168.1.6/tcp/60646"
+Listening on "/ip4/127.0.0.1/tcp/60646"
+rec dkg_init
+cm_id: PeerId("12D3KooWEbMPvowgsS2kkgHiv2Hk1L4fdMWByTq65AYZceGxt4iF")
+message.source: PeerId("12D3KooWPb2cg4Vf59Jjg998vLB44FcEW5GxfsmMv5Pm36CzRz4D")
+num_nodes: 16
+cm_id: PeerId("12D3KooWPb2cg4Vf59Jjg998vLB44FcEW5GxfsmMv5Pm36CzRz4D")
+Final peers: 
+12D3KooWMRhcMkxJqbp7CscHmN29oNg1vuvN3MoLmJqLBSyLn5yE
+12D3KooWAbjV9VzW3WjWnnRniZYs29YRRb6uhFwtWsEdWCzyZnXy
+12D3KooWJvac73VjexcPztwsyfx861vgxwu1GvoBYq7NRkwF8jzX
+12D3KooWQ1ZE52kyY6952YLiwF6TYrdUgvzoCrsYyp8CyEb6dKsN
+12D3KooWSjS1D8jMSMCj4dwSEK8XbnYYKP36BgNQj6Ffg6bFaMwf
+12D3KooWBEPnLpUTx2ZEWDuR2gX5MFtKrT3M4cKZErPWcky5TcZQ
+12D3KooWDYvfXpmHiPrXQcxK1eiDHxS1ZywAaefoP85gyGR9tm4S
+12D3KooWE8e9YM82BDWzAEe39eyz8XYZJ7snURQJXR24rwVQh2C8
+12D3KooWCrjf5ZgKTRZYj24bwPzkgSnyaZXmUWWPMCagfWrj67H4
+12D3KooWFJYEK7af6fJgnLpQfLhXULixuTPUKXYGzqPdW2TftKsm
+12D3KooWNKAnzcnDpxWtrou6WPDG2diwvzBnwwZAjYvDQ66dY8fk
+12D3KooWLVqJwSUknkpTL6JrFWxHXi8AGyFbjoSeBHPtJa59YP7m
+12D3KooWEJ7PcdgRxhmRFgASYqdLAkvDY2tmpNbnt2X1QaD4VfXp
+12D3KooWEbMPvowgsS2kkgHiv2Hk1L4fdMWByTq65AYZceGxt4iF
+12D3KooWCGM2ZbHagFgLMBVQWjtepuxRxN6B8xftucnAqoCi6Zgn
+12D3KooWBMBcZgyggDZzvPyfRtLM3wEFRKV8acEvWW4Ucwz4XYNf
+this participant.id: 13
+rec dkg_init
+cm_id: PeerId("12D3KooWBEPnLpUTx2ZEWDuR2gX5MFtKrT3M4cKZErPWcky5TcZQ")
+message.source: PeerId("12D3KooWPb2cg4Vf59Jjg998vLB44FcEW5GxfsmMv5Pm36CzRz4D")
+num_nodes: 16
+cm_id: PeerId("12D3KooWPb2cg4Vf59Jjg998vLB44FcEW5GxfsmMv5Pm36CzRz4D")
+Final peers: 
+12D3KooWMRhcMkxJqbp7CscHmN29oNg1vuvN3MoLmJqLBSyLn5yE
+12D3KooWAbjV9VzW3WjWnnRniZYs29YRRb6uhFwtWsEdWCzyZnXy
+12D3KooWJvac73VjexcPztwsyfx861vgxwu1GvoBYq7NRkwF8jzX
+12D3KooWQ1ZE52kyY6952YLiwF6TYrdUgvzoCrsYyp8CyEb6dKsN
+12D3KooWSjS1D8jMSMCj4dwSEK8XbnYYKP36BgNQj6Ffg6bFaMwf
+12D3KooWBEPnLpUTx2ZEWDuR2gX5MFtKrT3M4cKZErPWcky5TcZQ
+12D3KooWDYvfXpmHiPrXQcxK1eiDHxS1ZywAaefoP85gyGR9tm4S
+12D3KooWE8e9YM82BDWzAEe39eyz8XYZJ7snURQJXR24rwVQh2C8
+12D3KooWCrjf5ZgKTRZYj24bwPzkgSnyaZXmUWWPMCagfWrj67H4
+12D3KooWFJYEK7af6fJgnLpQfLhXULixuTPUKXYGzqPdW2TftKsm
+12D3KooWNKAnzcnDpxWtrou6WPDG2diwvzBnwwZAjYvDQ66dY8fk
+12D3KooWLVqJwSUknkpTL6JrFWxHXi8AGyFbjoSeBHPtJa59YP7m
+rec dkg_init
+12D3KooWEJ7PcdgRxhmRFgASYqdLAkvDY2tmpNbnt2X1QaD4VfXp
+12D3KooWEbMPvowgsS2kkgHiv2Hk1L4fdMWByTq65AYZceGxt4iF
+cm_id: PeerId("12D3KooWSjS1D8jMSMCj4dwSEK8XbnYYKP36BgNQj6Ffg6bFaMwf")
+12D3KooWCGM2ZbHagFgLMBVQWjtepuxRxN6B8xftucnAqoCi6Zgn
+message.source: PeerId("12D3KooWPb2cg4Vf59Jjg998vLB44FcEW5GxfsmMv5Pm36CzRz4D")
+num_nodes: 16
+12D3KooWBMBcZgyggDZzvPyfRtLM3wEFRKV8acEvWW4Ucwz4XYNf
+this participant.id: 5
+cm_id: PeerId("12D3KooWPb2cg4Vf59Jjg998vLB44FcEW5GxfsmMv5Pm36CzRz4D")
+Final peers: 
+12D3KooWMRhcMkxJqbp7CscHmN29oNg1vuvN3MoLmJqLBSyLn5yE
+12D3KooWAbjV9VzW3WjWnnRniZYs29YRRb6uhFwtWsEdWCzyZnXy
+12D3KooWJvac73VjexcPztwsyfx861vgxwu1GvoBYq7NRkwF8jzX
+12D3KooWQ1ZE52kyY6952YLiwF6TYrdUgvzoCrsYyp8CyEb6dKsN
+12D3KooWSjS1D8jMSMCj4dwSEK8XbnYYKP36BgNQj6Ffg6bFaMwf
+12D3KooWBEPnLpUTx2ZEWDuR2gX5MFtKrT3M4cKZErPWcky5TcZQ
+12D3KooWDYvfXpmHiPrXQcxK1eiDHxS1ZywAaefoP85gyGR9tm4S
+12D3KooWE8e9YM82BDWzAEe39eyz8XYZJ7snURQJXR24rwVQh2C8
+12D3KooWCrjf5ZgKTRZYj24bwPzkgSnyaZXmUWWPMCagfWrj67H4
+12D3KooWFJYEK7af6fJgnLpQfLhXULixuTPUKXYGzqPdW2TftKsm
+12D3KooWNKAnzcnDpxWtrou6WPDG2diwvzBnwwZAjYvDQ66dY8fk
+12D3KooWLVqJwSUknkpTL6JrFWxHXi8AGyFbjoSeBHPtJa59YP7m
+12D3KooWEJ7PcdgRxhmRFgASYqdLAkvDY2tmpNbnt2X1QaD4VfXp
+12D3KooWEbMPvowgsS2kkgHiv2Hk1L4fdMWByTq65AYZceGxt4iF
+12D3KooWCGM2ZbHagFgLMBVQWjtepuxRxN6B8xftucnAqoCi6Zgn
+12D3KooWBMBcZgyggDZzvPyfRtLM3wEFRKV8acEvWW4Ucwz4XYNf
+this participant.id: 4
+rec dkg_init
+rec dkg_init
+cm_id: PeerId("12D3KooWDYvfXpmHiPrXQcxK1eiDHxS1ZywAaefoP85gyGR9tm4S")
+cm_id: PeerId("12D3KooWFJYEK7af6fJgnLpQfLhXULixuTPUKXYGzqPdW2TftKsm")
+message.source: PeerId("12D3KooWPb2cg4Vf59Jjg998vLB44FcEW5GxfsmMv5Pm36CzRz4D")
+num_nodes: 16
+message.source: PeerId("12D3KooWPb2cg4Vf59Jjg998vLB44FcEW5GxfsmMv5Pm36CzRz4D")
+num_nodes: 16
+cm_id: PeerId("12D3KooWPb2cg4Vf59Jjg998vLB44FcEW5GxfsmMv5Pm36CzRz4D")
+cm_id: PeerId("12D3KooWPb2cg4Vf59Jjg998vLB44FcEW5GxfsmMv5Pm36CzRz4D")
+Final peers: 
+Final peers: 
+12D3KooWMRhcMkxJqbp7CscHmN29oNg1vuvN3MoLmJqLBSyLn5yE
+12D3KooWMRhcMkxJqbp7CscHmN29oNg1vuvN3MoLmJqLBSyLn5yE
+12D3KooWAbjV9VzW3WjWnnRniZYs29YRRb6uhFwtWsEdWCzyZnXy
+12D3KooWAbjV9VzW3WjWnnRniZYs29YRRb6uhFwtWsEdWCzyZnXy
+12D3KooWJvac73VjexcPztwsyfx861vgxwu1GvoBYq7NRkwF8jzX
+12D3KooWJvac73VjexcPztwsyfx861vgxwu1GvoBYq7NRkwF8jzX
+12D3KooWQ1ZE52kyY6952YLiwF6TYrdUgvzoCrsYyp8CyEb6dKsN
+12D3KooWQ1ZE52kyY6952YLiwF6TYrdUgvzoCrsYyp8CyEb6dKsN
+rec dkg_init
+12D3KooWSjS1D8jMSMCj4dwSEK8XbnYYKP36BgNQj6Ffg6bFaMwf
+12D3KooWSjS1D8jMSMCj4dwSEK8XbnYYKP36BgNQj6Ffg6bFaMwf
+12D3KooWBEPnLpUTx2ZEWDuR2gX5MFtKrT3M4cKZErPWcky5TcZQ
+12D3KooWBEPnLpUTx2ZEWDuR2gX5MFtKrT3M4cKZErPWcky5TcZQ
+12D3KooWDYvfXpmHiPrXQcxK1eiDHxS1ZywAaefoP85gyGR9tm4S
+12D3KooWDYvfXpmHiPrXQcxK1eiDHxS1ZywAaefoP85gyGR9tm4S
+12D3KooWE8e9YM82BDWzAEe39eyz8XYZJ7snURQJXR24rwVQh2C8
+12D3KooWE8e9YM82BDWzAEe39eyz8XYZJ7snURQJXR24rwVQh2C8
+12D3KooWCrjf5ZgKTRZYj24bwPzkgSnyaZXmUWWPMCagfWrj67H4
+12D3KooWCrjf5ZgKTRZYj24bwPzkgSnyaZXmUWWPMCagfWrj67H4
+12D3KooWFJYEK7af6fJgnLpQfLhXULixuTPUKXYGzqPdW2TftKsm
+12D3KooWFJYEK7af6fJgnLpQfLhXULixuTPUKXYGzqPdW2TftKsm
+12D3KooWNKAnzcnDpxWtrou6WPDG2diwvzBnwwZAjYvDQ66dY8fk
+12D3KooWNKAnzcnDpxWtrou6WPDG2diwvzBnwwZAjYvDQ66dY8fk
+12D3KooWLVqJwSUknkpTL6JrFWxHXi8AGyFbjoSeBHPtJa59YP7m
+12D3KooWLVqJwSUknkpTL6JrFWxHXi8AGyFbjoSeBHPtJa59YP7m
+12D3KooWEJ7PcdgRxhmRFgASYqdLAkvDY2tmpNbnt2X1QaD4VfXp
+12D3KooWEJ7PcdgRxhmRFgASYqdLAkvDY2tmpNbnt2X1QaD4VfXp
+12D3KooWEbMPvowgsS2kkgHiv2Hk1L4fdMWByTq65AYZceGxt4iF
+12D3KooWEbMPvowgsS2kkgHiv2Hk1L4fdMWByTq65AYZceGxt4iF
+rec dkg_init
+cm_id: PeerId("12D3KooWLVqJwSUknkpTL6JrFWxHXi8AGyFbjoSeBHPtJa59YP7m")
+message.source: PeerId("12D3KooWPb2cg4Vf59Jjg998vLB44FcEW5GxfsmMv5Pm36CzRz4D")
+num_nodes: 16
+cm_id: PeerId("12D3KooWPb2cg4Vf59Jjg998vLB44FcEW5GxfsmMv5Pm36CzRz4D")
+Final peers: 
+12D3KooWMRhcMkxJqbp7CscHmN29oNg1vuvN3MoLmJqLBSyLn5yE
+12D3KooWAbjV9VzW3WjWnnRniZYs29YRRb6uhFwtWsEdWCzyZnXy
+12D3KooWJvac73VjexcPztwsyfx861vgxwu1GvoBYq7NRkwF8jzX
+12D3KooWQ1ZE52kyY6952YLiwF6TYrdUgvzoCrsYyp8CyEb6dKsN
+12D3KooWSjS1D8jMSMCj4dwSEK8XbnYYKP36BgNQj6Ffg6bFaMwf
+12D3KooWBEPnLpUTx2ZEWDuR2gX5MFtKrT3M4cKZErPWcky5TcZQ
+12D3KooWDYvfXpmHiPrXQcxK1eiDHxS1ZywAaefoP85gyGR9tm4S
+12D3KooWE8e9YM82BDWzAEe39eyz8XYZJ7snURQJXR24rwVQh2C8
+rec dkg_init
+12D3KooWCrjf5ZgKTRZYj24bwPzkgSnyaZXmUWWPMCagfWrj67H4
+cm_id: PeerId("12D3KooWQ1ZE52kyY6952YLiwF6TYrdUgvzoCrsYyp8CyEb6dKsN")
+12D3KooWFJYEK7af6fJgnLpQfLhXULixuTPUKXYGzqPdW2TftKsm
+message.source: PeerId("12D3KooWPb2cg4Vf59Jjg998vLB44FcEW5GxfsmMv5Pm36CzRz4D")
+num_nodes: 16
+cm_id: PeerId("12D3KooWPb2cg4Vf59Jjg998vLB44FcEW5GxfsmMv5Pm36CzRz4D")
+Final peers: 
+12D3KooWMRhcMkxJqbp7CscHmN29oNg1vuvN3MoLmJqLBSyLn5yE
+12D3KooWAbjV9VzW3WjWnnRniZYs29YRRb6uhFwtWsEdWCzyZnXy
+12D3KooWJvac73VjexcPztwsyfx861vgxwu1GvoBYq7NRkwF8jzX
+12D3KooWQ1ZE52kyY6952YLiwF6TYrdUgvzoCrsYyp8CyEb6dKsN
+12D3KooWSjS1D8jMSMCj4dwSEK8XbnYYKP36BgNQj6Ffg6bFaMwf
+12D3KooWBEPnLpUTx2ZEWDuR2gX5MFtKrT3M4cKZErPWcky5TcZQ
+12D3KooWDYvfXpmHiPrXQcxK1eiDHxS1ZywAaefoP85gyGR9tm4S
+12D3KooWE8e9YM82BDWzAEe39eyz8XYZJ7snURQJXR24rwVQh2C8
+12D3KooWCrjf5ZgKTRZYj24bwPzkgSnyaZXmUWWPMCagfWrj67H4
+12D3KooWFJYEK7af6fJgnLpQfLhXULixuTPUKXYGzqPdW2TftKsm
+12D3KooWNKAnzcnDpxWtrou6WPDG2diwvzBnwwZAjYvDQ66dY8fk
+12D3KooWLVqJwSUknkpTL6JrFWxHXi8AGyFbjoSeBHPtJa59YP7m
+12D3KooWEJ7PcdgRxhmRFgASYqdLAkvDY2tmpNbnt2X1QaD4VfXp
+12D3KooWEbMPvowgsS2kkgHiv2Hk1L4fdMWByTq65AYZceGxt4iF
+12D3KooWCGM2ZbHagFgLMBVQWjtepuxRxN6B8xftucnAqoCi6Zgn
+12D3KooWBMBcZgyggDZzvPyfRtLM3wEFRKV8acEvWW4Ucwz4XYNf
+this participant.id: 3
+rec dkg_init
+cm_id: PeerId("12D3KooWBMBcZgyggDZzvPyfRtLM3wEFRKV8acEvWW4Ucwz4XYNf")
+rec dkg_init
+message.source: PeerId("12D3KooWPb2cg4Vf59Jjg998vLB44FcEW5GxfsmMv5Pm36CzRz4D")
+num_nodes: 16
+cm_id: PeerId("12D3KooWMRhcMkxJqbp7CscHmN29oNg1vuvN3MoLmJqLBSyLn5yE")
+cm_id: PeerId("12D3KooWPb2cg4Vf59Jjg998vLB44FcEW5GxfsmMv5Pm36CzRz4D")
+message.source: PeerId("12D3KooWPb2cg4Vf59Jjg998vLB44FcEW5GxfsmMv5Pm36CzRz4D")
+num_nodes: 16
+Final peers: 
+cm_id: PeerId("12D3KooWPb2cg4Vf59Jjg998vLB44FcEW5GxfsmMv5Pm36CzRz4D")
+12D3KooWMRhcMkxJqbp7CscHmN29oNg1vuvN3MoLmJqLBSyLn5yE
+12D3KooWAbjV9VzW3WjWnnRniZYs29YRRb6uhFwtWsEdWCzyZnXy
+12D3KooWJvac73VjexcPztwsyfx861vgxwu1GvoBYq7NRkwF8jzX
+12D3KooWQ1ZE52kyY6952YLiwF6TYrdUgvzoCrsYyp8CyEb6dKsN
+12D3KooWSjS1D8jMSMCj4dwSEK8XbnYYKP36BgNQj6Ffg6bFaMwf
+12D3KooWBEPnLpUTx2ZEWDuR2gX5MFtKrT3M4cKZErPWcky5TcZQ
+12D3KooWDYvfXpmHiPrXQcxK1eiDHxS1ZywAaefoP85gyGR9tm4S
+12D3KooWE8e9YM82BDWzAEe39eyz8XYZJ7snURQJXR24rwVQh2C8
+12D3KooWCrjf5ZgKTRZYj24bwPzkgSnyaZXmUWWPMCagfWrj67H4
+12D3KooWFJYEK7af6fJgnLpQfLhXULixuTPUKXYGzqPdW2TftKsm
+12D3KooWNKAnzcnDpxWtrou6WPDG2diwvzBnwwZAjYvDQ66dY8fk
+12D3KooWLVqJwSUknkpTL6JrFWxHXi8AGyFbjoSeBHPtJa59YP7m
+12D3KooWEJ7PcdgRxhmRFgASYqdLAkvDY2tmpNbnt2X1QaD4VfXp
+12D3KooWEbMPvowgsS2kkgHiv2Hk1L4fdMWByTq65AYZceGxt4iF
+12D3KooWCGM2ZbHagFgLMBVQWjtepuxRxN6B8xftucnAqoCi6Zgn
+12D3KooWBMBcZgyggDZzvPyfRtLM3wEFRKV8acEvWW4Ucwz4XYNf
+this participant.id: 15
+rec dkg_init
+cm_id: PeerId("12D3KooWJvac73VjexcPztwsyfx861vgxwu1GvoBYq7NRkwF8jzX")
+cm_id: PeerId("12D3KooWNKAnzcnDpxWtrou6WPDG2diwvzBnwwZAjYvDQ66dY8fk")
+message.source: PeerId("12D3KooWPb2cg4Vf59Jjg998vLB44FcEW5GxfsmMv5Pm36CzRz4D")
+num_nodes: 16
+message.source: PeerId("12D3KooWPb2cg4Vf59Jjg998vLB44FcEW5GxfsmMv5Pm36CzRz4D")
+num_nodes: 16
+cm_id: PeerId("12D3KooWPb2cg4Vf59Jjg998vLB44FcEW5GxfsmMv5Pm36CzRz4D")
+cm_id: PeerId("12D3KooWPb2cg4Vf59Jjg998vLB44FcEW5GxfsmMv5Pm36CzRz4D")
+Final peers: 
+Final peers: 
+12D3KooWMRhcMkxJqbp7CscHmN29oNg1vuvN3MoLmJqLBSyLn5yE
+12D3KooWMRhcMkxJqbp7CscHmN29oNg1vuvN3MoLmJqLBSyLn5yE
+12D3KooWAbjV9VzW3WjWnnRniZYs29YRRb6uhFwtWsEdWCzyZnXy
+12D3KooWAbjV9VzW3WjWnnRniZYs29YRRb6uhFwtWsEdWCzyZnXy
+12D3KooWJvac73VjexcPztwsyfx861vgxwu1GvoBYq7NRkwF8jzX
+12D3KooWQ1ZE52kyY6952YLiwF6TYrdUgvzoCrsYyp8CyEb6dKsN
+12D3KooWSjS1D8jMSMCj4dwSEK8XbnYYKP36BgNQj6Ffg6bFaMwf
+12D3KooWBEPnLpUTx2ZEWDuR2gX5MFtKrT3M4cKZErPWcky5TcZQ
+12D3KooWDYvfXpmHiPrXQcxK1eiDHxS1ZywAaefoP85gyGR9tm4S
+12D3KooWE8e9YM82BDWzAEe39eyz8XYZJ7snURQJXR24rwVQh2C8
+12D3KooWCrjf5ZgKTRZYj24bwPzkgSnyaZXmUWWPMCagfWrj67H4
+12D3KooWCGM2ZbHagFgLMBVQWjtepuxRxN6B8xftucnAqoCi6Zgn
+12D3KooWFJYEK7af6fJgnLpQfLhXULixuTPUKXYGzqPdW2TftKsm
+12D3KooWBMBcZgyggDZzvPyfRtLM3wEFRKV8acEvWW4Ucwz4XYNf
+12D3KooWNKAnzcnDpxWtrou6WPDG2diwvzBnwwZAjYvDQ66dY8fk
+12D3KooWLVqJwSUknkpTL6JrFWxHXi8AGyFbjoSeBHPtJa59YP7m
+12D3KooWEJ7PcdgRxhmRFgASYqdLAkvDY2tmpNbnt2X1QaD4VfXp
+12D3KooWEbMPvowgsS2kkgHiv2Hk1L4fdMWByTq65AYZceGxt4iF
+12D3KooWCGM2ZbHagFgLMBVQWjtepuxRxN6B8xftucnAqoCi6Zgn
+12D3KooWBMBcZgyggDZzvPyfRtLM3wEFRKV8acEvWW4Ucwz4XYNf
+this participant.id: 2
+rec dkg_init
+cm_id: PeerId("12D3KooWCrjf5ZgKTRZYj24bwPzkgSnyaZXmUWWPMCagfWrj67H4")
+message.source: PeerId("12D3KooWPb2cg4Vf59Jjg998vLB44FcEW5GxfsmMv5Pm36CzRz4D")
+num_nodes: 16
+cm_id: PeerId("12D3KooWPb2cg4Vf59Jjg998vLB44FcEW5GxfsmMv5Pm36CzRz4D")
+Final peers: 
+12D3KooWMRhcMkxJqbp7CscHmN29oNg1vuvN3MoLmJqLBSyLn5yE
+rec dkg_init
+12D3KooWAbjV9VzW3WjWnnRniZYs29YRRb6uhFwtWsEdWCzyZnXy
+12D3KooWJvac73VjexcPztwsyfx861vgxwu1GvoBYq7NRkwF8jzX
+cm_id: PeerId("12D3KooWAbjV9VzW3WjWnnRniZYs29YRRb6uhFwtWsEdWCzyZnXy")
+12D3KooWQ1ZE52kyY6952YLiwF6TYrdUgvzoCrsYyp8CyEb6dKsN
+message.source: PeerId("12D3KooWPb2cg4Vf59Jjg998vLB44FcEW5GxfsmMv5Pm36CzRz4D")
+num_nodes: 16
+12D3KooWSjS1D8jMSMCj4dwSEK8XbnYYKP36BgNQj6Ffg6bFaMwf
+cm_id: PeerId("12D3KooWPb2cg4Vf59Jjg998vLB44FcEW5GxfsmMv5Pm36CzRz4D")
+12D3KooWBEPnLpUTx2ZEWDuR2gX5MFtKrT3M4cKZErPWcky5TcZQ
+12D3KooWDYvfXpmHiPrXQcxK1eiDHxS1ZywAaefoP85gyGR9tm4S
+Final peers: 
+12D3KooWE8e9YM82BDWzAEe39eyz8XYZJ7snURQJXR24rwVQh2C8
+12D3KooWMRhcMkxJqbp7CscHmN29oNg1vuvN3MoLmJqLBSyLn5yE
+12D3KooWCrjf5ZgKTRZYj24bwPzkgSnyaZXmUWWPMCagfWrj67H4
+12D3KooWAbjV9VzW3WjWnnRniZYs29YRRb6uhFwtWsEdWCzyZnXy
+12D3KooWFJYEK7af6fJgnLpQfLhXULixuTPUKXYGzqPdW2TftKsm
+12D3KooWJvac73VjexcPztwsyfx861vgxwu1GvoBYq7NRkwF8jzX
+12D3KooWNKAnzcnDpxWtrou6WPDG2diwvzBnwwZAjYvDQ66dY8fk
+12D3KooWQ1ZE52kyY6952YLiwF6TYrdUgvzoCrsYyp8CyEb6dKsN
+12D3KooWLVqJwSUknkpTL6JrFWxHXi8AGyFbjoSeBHPtJa59YP7m
+12D3KooWSjS1D8jMSMCj4dwSEK8XbnYYKP36BgNQj6Ffg6bFaMwf
+12D3KooWEJ7PcdgRxhmRFgASYqdLAkvDY2tmpNbnt2X1QaD4VfXp
+12D3KooWBEPnLpUTx2ZEWDuR2gX5MFtKrT3M4cKZErPWcky5TcZQ
+12D3KooWEbMPvowgsS2kkgHiv2Hk1L4fdMWByTq65AYZceGxt4iF
+12D3KooWDYvfXpmHiPrXQcxK1eiDHxS1ZywAaefoP85gyGR9tm4S
+12D3KooWCGM2ZbHagFgLMBVQWjtepuxRxN6B8xftucnAqoCi6Zgn
+12D3KooWE8e9YM82BDWzAEe39eyz8XYZJ7snURQJXR24rwVQh2C8
+12D3KooWBMBcZgyggDZzvPyfRtLM3wEFRKV8acEvWW4Ucwz4XYNf
+12D3KooWCrjf5ZgKTRZYj24bwPzkgSnyaZXmUWWPMCagfWrj67H4
+12D3KooWFJYEK7af6fJgnLpQfLhXULixuTPUKXYGzqPdW2TftKsm
+12D3KooWNKAnzcnDpxWtrou6WPDG2diwvzBnwwZAjYvDQ66dY8fk
+12D3KooWLVqJwSUknkpTL6JrFWxHXi8AGyFbjoSeBHPtJa59YP7m
+12D3KooWEJ7PcdgRxhmRFgASYqdLAkvDY2tmpNbnt2X1QaD4VfXp
+12D3KooWEbMPvowgsS2kkgHiv2Hk1L4fdMWByTq65AYZceGxt4iF
+Final peers: 
+12D3KooWCGM2ZbHagFgLMBVQWjtepuxRxN6B8xftucnAqoCi6Zgn
+12D3KooWMRhcMkxJqbp7CscHmN29oNg1vuvN3MoLmJqLBSyLn5yE
+12D3KooWAbjV9VzW3WjWnnRniZYs29YRRb6uhFwtWsEdWCzyZnXy
+12D3KooWJvac73VjexcPztwsyfx861vgxwu1GvoBYq7NRkwF8jzX
+12D3KooWQ1ZE52kyY6952YLiwF6TYrdUgvzoCrsYyp8CyEb6dKsN
+12D3KooWSjS1D8jMSMCj4dwSEK8XbnYYKP36BgNQj6Ffg6bFaMwf
+12D3KooWBEPnLpUTx2ZEWDuR2gX5MFtKrT3M4cKZErPWcky5TcZQ
+12D3KooWDYvfXpmHiPrXQcxK1eiDHxS1ZywAaefoP85gyGR9tm4S
+12D3KooWE8e9YM82BDWzAEe39eyz8XYZJ7snURQJXR24rwVQh2C8
+12D3KooWCrjf5ZgKTRZYj24bwPzkgSnyaZXmUWWPMCagfWrj67H4
+12D3KooWFJYEK7af6fJgnLpQfLhXULixuTPUKXYGzqPdW2TftKsm
+12D3KooWNKAnzcnDpxWtrou6WPDG2diwvzBnwwZAjYvDQ66dY8fk
+12D3KooWLVqJwSUknkpTL6JrFWxHXi8AGyFbjoSeBHPtJa59YP7m
+12D3KooWEJ7PcdgRxhmRFgASYqdLAkvDY2tmpNbnt2X1QaD4VfXp
+12D3KooWEbMPvowgsS2kkgHiv2Hk1L4fdMWByTq65AYZceGxt4iF
+12D3KooWCGM2ZbHagFgLMBVQWjtepuxRxN6B8xftucnAqoCi6Zgn
+12D3KooWBMBcZgyggDZzvPyfRtLM3wEFRKV8acEvWW4Ucwz4XYNf
+this participant.id: 0
+12D3KooWJvac73VjexcPztwsyfx861vgxwu1GvoBYq7NRkwF8jzX
+this participant.id: 6
+this participant.id: 8
+12D3KooWNKAnzcnDpxWtrou6WPDG2diwvzBnwwZAjYvDQ66dY8fk
+12D3KooWLVqJwSUknkpTL6JrFWxHXi8AGyFbjoSeBHPtJa59YP7m
+12D3KooWEJ7PcdgRxhmRFgASYqdLAkvDY2tmpNbnt2X1QaD4VfXp
+12D3KooWEbMPvowgsS2kkgHiv2Hk1L4fdMWByTq65AYZceGxt4iF
+12D3KooWCGM2ZbHagFgLMBVQWjtepuxRxN6B8xftucnAqoCi6Zgn
+12D3KooWBMBcZgyggDZzvPyfRtLM3wEFRKV8acEvWW4Ucwz4XYNf
+this participant.id: 11
+12D3KooWBMBcZgyggDZzvPyfRtLM3wEFRKV8acEvWW4Ucwz4XYNf
+this participant.id: 1
+12D3KooWQ1ZE52kyY6952YLiwF6TYrdUgvzoCrsYyp8CyEb6dKsN
+12D3KooWSjS1D8jMSMCj4dwSEK8XbnYYKP36BgNQj6Ffg6bFaMwf
+12D3KooWCGM2ZbHagFgLMBVQWjtepuxRxN6B8xftucnAqoCi6Zgn
+12D3KooWBMBcZgyggDZzvPyfRtLM3wEFRKV8acEvWW4Ucwz4XYNf
+this participant.id: 9
+12D3KooWBEPnLpUTx2ZEWDuR2gX5MFtKrT3M4cKZErPWcky5TcZQ
+12D3KooWDYvfXpmHiPrXQcxK1eiDHxS1ZywAaefoP85gyGR9tm4S
+12D3KooWE8e9YM82BDWzAEe39eyz8XYZJ7snURQJXR24rwVQh2C8
+12D3KooWCrjf5ZgKTRZYj24bwPzkgSnyaZXmUWWPMCagfWrj67H4
+12D3KooWFJYEK7af6fJgnLpQfLhXULixuTPUKXYGzqPdW2TftKsm
+12D3KooWNKAnzcnDpxWtrou6WPDG2diwvzBnwwZAjYvDQ66dY8fk
+12D3KooWLVqJwSUknkpTL6JrFWxHXi8AGyFbjoSeBHPtJa59YP7m
+12D3KooWEJ7PcdgRxhmRFgASYqdLAkvDY2tmpNbnt2X1QaD4VfXp
+12D3KooWEbMPvowgsS2kkgHiv2Hk1L4fdMWByTq65AYZceGxt4iF
+12D3KooWCGM2ZbHagFgLMBVQWjtepuxRxN6B8xftucnAqoCi6Zgn
+12D3KooWBMBcZgyggDZzvPyfRtLM3wEFRKV8acEvWW4Ucwz4XYNf
+this participant.id: 10
+received
+participant is going to be sent
+received
+participant is going to be sent
+rec dkg_init
+cm_id: PeerId("12D3KooWCGM2ZbHagFgLMBVQWjtepuxRxN6B8xftucnAqoCi6Zgn")
+message.source: PeerId("12D3KooWPb2cg4Vf59Jjg998vLB44FcEW5GxfsmMv5Pm36CzRz4D")
+num_nodes: 16
+cm_id: PeerId("12D3KooWPb2cg4Vf59Jjg998vLB44FcEW5GxfsmMv5Pm36CzRz4D")
+Final peers: 
+12D3KooWMRhcMkxJqbp7CscHmN29oNg1vuvN3MoLmJqLBSyLn5yE
+12D3KooWAbjV9VzW3WjWnnRniZYs29YRRb6uhFwtWsEdWCzyZnXy
+12D3KooWJvac73VjexcPztwsyfx861vgxwu1GvoBYq7NRkwF8jzX
+12D3KooWQ1ZE52kyY6952YLiwF6TYrdUgvzoCrsYyp8CyEb6dKsN
+12D3KooWSjS1D8jMSMCj4dwSEK8XbnYYKP36BgNQj6Ffg6bFaMwf
+12D3KooWBEPnLpUTx2ZEWDuR2gX5MFtKrT3M4cKZErPWcky5TcZQ
+12D3KooWDYvfXpmHiPrXQcxK1eiDHxS1ZywAaefoP85gyGR9tm4S
+12D3KooWE8e9YM82BDWzAEe39eyz8XYZJ7snURQJXR24rwVQh2C8
+12D3KooWCrjf5ZgKTRZYj24bwPzkgSnyaZXmUWWPMCagfWrj67H4
+12D3KooWFJYEK7af6fJgnLpQfLhXULixuTPUKXYGzqPdW2TftKsm
+12D3KooWNKAnzcnDpxWtrou6WPDG2diwvzBnwwZAjYvDQ66dY8fk
+12D3KooWLVqJwSUknkpTL6JrFWxHXi8AGyFbjoSeBHPtJa59YP7m
+12D3KooWEJ7PcdgRxhmRFgASYqdLAkvDY2tmpNbnt2X1QaD4VfXp
+12D3KooWEbMPvowgsS2kkgHiv2Hk1L4fdMWByTq65AYZceGxt4iF
+12D3KooWCGM2ZbHagFgLMBVQWjtepuxRxN6B8xftucnAqoCi6Zgn
+12D3KooWBMBcZgyggDZzvPyfRtLM3wEFRKV8acEvWW4Ucwz4XYNf
+this participant.id: 14
+rec dkg_init
+cm_id: PeerId("12D3KooWEJ7PcdgRxhmRFgASYqdLAkvDY2tmpNbnt2X1QaD4VfXp")
+message.source: PeerId("12D3KooWPb2cg4Vf59Jjg998vLB44FcEW5GxfsmMv5Pm36CzRz4D")
+num_nodes: 16
+cm_id: PeerId("12D3KooWPb2cg4Vf59Jjg998vLB44FcEW5GxfsmMv5Pm36CzRz4D")
+Final peers: 
+12D3KooWMRhcMkxJqbp7CscHmN29oNg1vuvN3MoLmJqLBSyLn5yE
+12D3KooWAbjV9VzW3WjWnnRniZYs29YRRb6uhFwtWsEdWCzyZnXy
+12D3KooWJvac73VjexcPztwsyfx861vgxwu1GvoBYq7NRkwF8jzX
+12D3KooWQ1ZE52kyY6952YLiwF6TYrdUgvzoCrsYyp8CyEb6dKsN
+12D3KooWSjS1D8jMSMCj4dwSEK8XbnYYKP36BgNQj6Ffg6bFaMwf
+12D3KooWBEPnLpUTx2ZEWDuR2gX5MFtKrT3M4cKZErPWcky5TcZQ
+12D3KooWDYvfXpmHiPrXQcxK1eiDHxS1ZywAaefoP85gyGR9tm4S
+12D3KooWE8e9YM82BDWzAEe39eyz8XYZJ7snURQJXR24rwVQh2C8
+12D3KooWCrjf5ZgKTRZYj24bwPzkgSnyaZXmUWWPMCagfWrj67H4
+12D3KooWFJYEK7af6fJgnLpQfLhXULixuTPUKXYGzqPdW2TftKsm
+12D3KooWNKAnzcnDpxWtrou6WPDG2diwvzBnwwZAjYvDQ66dY8fk
+12D3KooWLVqJwSUknkpTL6JrFWxHXi8AGyFbjoSeBHPtJa59YP7m
+12D3KooWEJ7PcdgRxhmRFgASYqdLAkvDY2tmpNbnt2X1QaD4VfXp
+12D3KooWEbMPvowgsS2kkgHiv2Hk1L4fdMWByTq65AYZceGxt4iF
+12D3KooWCGM2ZbHagFgLMBVQWjtepuxRxN6B8xftucnAqoCi6Zgn
+12D3KooWBMBcZgyggDZzvPyfRtLM3wEFRKV8acEvWW4Ucwz4XYNf
+this participant.id: 12
+rec dkg_init
+cm_id: PeerId("12D3KooWE8e9YM82BDWzAEe39eyz8XYZJ7snURQJXR24rwVQh2C8")
+message.source: PeerId("12D3KooWPb2cg4Vf59Jjg998vLB44FcEW5GxfsmMv5Pm36CzRz4D")
+num_nodes: 16
+cm_id: PeerId("12D3KooWPb2cg4Vf59Jjg998vLB44FcEW5GxfsmMv5Pm36CzRz4D")
+Final peers: 
+12D3KooWMRhcMkxJqbp7CscHmN29oNg1vuvN3MoLmJqLBSyLn5yE
+12D3KooWAbjV9VzW3WjWnnRniZYs29YRRb6uhFwtWsEdWCzyZnXy
+12D3KooWJvac73VjexcPztwsyfx861vgxwu1GvoBYq7NRkwF8jzX
+12D3KooWQ1ZE52kyY6952YLiwF6TYrdUgvzoCrsYyp8CyEb6dKsN
+12D3KooWSjS1D8jMSMCj4dwSEK8XbnYYKP36BgNQj6Ffg6bFaMwf
+12D3KooWBEPnLpUTx2ZEWDuR2gX5MFtKrT3M4cKZErPWcky5TcZQ
+12D3KooWDYvfXpmHiPrXQcxK1eiDHxS1ZywAaefoP85gyGR9tm4S
+12D3KooWE8e9YM82BDWzAEe39eyz8XYZJ7snURQJXR24rwVQh2C8
+12D3KooWCrjf5ZgKTRZYj24bwPzkgSnyaZXmUWWPMCagfWrj67H4
+12D3KooWFJYEK7af6fJgnLpQfLhXULixuTPUKXYGzqPdW2TftKsm
+12D3KooWNKAnzcnDpxWtrou6WPDG2diwvzBnwwZAjYvDQ66dY8fk
+12D3KooWLVqJwSUknkpTL6JrFWxHXi8AGyFbjoSeBHPtJa59YP7m
+12D3KooWEJ7PcdgRxhmRFgASYqdLAkvDY2tmpNbnt2X1QaD4VfXp
+12D3KooWEbMPvowgsS2kkgHiv2Hk1L4fdMWByTq65AYZceGxt4iF
+12D3KooWCGM2ZbHagFgLMBVQWjtepuxRxN6B8xftucnAqoCi6Zgn
+12D3KooWBMBcZgyggDZzvPyfRtLM3wEFRKV8acEvWW4Ucwz4XYNf
+this participant.id: 7
+received
+participant is going to be sent
+received
+participant is going to be sent
+received
+participant is going to be sent
+received
+participant is going to be sent
+received
+participant is going to be sent
+received
+participant is going to be sent
+received
+participant is going to be sent
+received
+participant is going to be sent
+received
+participant is going to be sent
+received
+participant is going to be sent
+received
+participant is going to be sent
+received
+participant is going to be sent
+received
+participant is going to be sent
+received
+participant is going to be sent
+Received participants struct from cm 
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+ps.len()=16
+ps[0].id=0
+Received participants struct from cm 
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+ps.len()=16
+ps[0].id=0
+Received participants struct from cm 
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+ps.len()=16
+ps[0].id=0
+Received participants struct from cm 
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+ps.len()=16
+ps[0].id=0
+Received participants struct from cm 
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+ps.len()=16
+ps[0].id=0
+Received participants struct from cm 
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+ps.len()=16
+ps[0].id=0
+Received participants struct from cm 
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+ps.len()=16
+ps[0].id=0
+Received participants struct from cm 
+0
+1
+2
+3
+4
+5
+6
+Received participants struct from cm 
+7
+8
+9
+10
+11
+12
+13
+14
+15
+ps.len()=16
+ps[0].id=0
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+ps.len()=16
+ps[0].id=0
+Received participants struct from cm 
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+ps.len()=16
+ps[0].id=0
+Received participants struct from cm 
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+ps.len()=16
+ps[0].id=0
+Received participants struct from cm 
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+ps.len()=16
+ps[0].id=0
+Received participants struct from cm 
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+ps.len()=16
+ps[0].id=0
+Received participants struct from cm 
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+ps.len()=16
+ps[0].id=0
+Received participants struct from cm 
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+ps.len()=16
+ps[0].id=0
+Received participants struct from cm 
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+ps.len()=16
+ps[0].id=0
+this share.participant_id=1
+this share.participant_id=3
+this share.participant_id=14
+this share.participant_id=0
+this share.participant_id=9
+this share.participant_id=4
+this share.participant_id=15
+this share.participant_id=11
+this share.participant_id=7
+this share.participant_id=2
+this share.participant_id=5
+this share.participant_id=12
+this share.participant_id=13
+this share.participant_id=6
+this share.participant_id=8
+this share.participant_id=10
+this share.participant_id=1
+this share.participant_id=0
+this share.participant_id=3
+this share.participant_id=14
+this share.participant_id=12
+this share.participant_id=4
+this share.participant_id=2
+this share.participant_id=11
+this share.participant_id=8
+this share.participant_id=7
+this share.participant_id=9
+this share.participant_id=15
+this share.participant_id=6
+this share.participant_id=5
+received
+AggregationReady msg going to be sent
+current node state =3
+going to be published to the network: Ready to aggregate
+received
+AggregationReady msg going to be sent
+current node state =3
+going to be published to the network: Ready to aggregate
+received
+AggregationReady msg going to be sent
+current node state =3
+going to be published to the network: Ready to aggregate
+received
+AggregationReady msg going to be sent
+current node state =3
+going to be published to the network: Ready to aggregate
+this share.participant_id=10
+this share.participant_id=13
+received
+AggregationReady msg going to be sent
+current node state =3
+going to be published to the network: Ready to aggregate
+received
+AggregationReady msg going to be sent
+current node state =3
+going to be published to the network: Ready to aggregate
+received
+AggregationReady msg going to be sent
+current node state =3
+going to be published to the network: Ready to aggregate
+received
+AggregationReady msg going to be sent
+current node state =3
+going to be published to the network: Ready to aggregate
+received
+AggregationReady msg going to be sent
+current node state =3
+going to be published to the network: Ready to aggregate
+received
+AggregationReady msg going to be sent
+current node state =3
+going to be published to the network: Ready to aggregate
+received
+AggregationReady msg going to be sent
+current node state =3
+going to be published to the network: Ready to aggregate
+received
+AggregationReady msg going to be sent
+current node state =3
+going to be published to the network: Ready to aggregate
+received
+AggregationReady msg going to be sent
+current node state =3
+going to be published to the network: Ready to aggregate
+received
+AggregationReady msg going to be sent
+current node state =3
+going to be published to the network: Ready to aggregate
+received
+AggregationReady msg going to be sent
+current node state =3
+going to be published to the network: Ready to aggregate
+received
+AggregationReady msg going to be sent
+current node state =3
+going to be published to the network: Ready to aggregate
+staging dkg share
+staging dkg share
+received
+dkg_share going to be sent
+state before sending dkg share out (should be 4): 4
+dkg share sent out
+staging dkg share
+staging dkg share
+staging dkg share
+received
+dkg_share going to be sent
+state before sending dkg share out (should be 4): 4
+dkg share sent out
+received
+dkg_share going to be sent
+state before sending dkg share out (should be 4): 4
+dkg share sent out
+staging dkg share
+received
+dkg_share going to be sent
+state before sending dkg share out (should be 4): 4
+dkg share sent out
+staging dkg share
+received
+dkg_share going to be sent
+state before sending dkg share out (should be 4): 4
+dkg share sent out
+received
+dkg_share going to be sent
+state before sending dkg share out (should be 4): 4
+dkg share sent out
+staging dkg share
+staging dkg share
+received
+dkg_share going to be sent
+state before sending dkg share out (should be 4): 4
+dkg share sent out
+staging dkg share
+received
+dkg_share going to be sent
+state before sending dkg share out (should be 4): 4
+dkg share sent out
+received
+dkg_share going to be sent
+state before sending dkg share out (should be 4): 4
+dkg share sent out
+staging dkg share
+received
+dkg_share going to be sent
+state before sending dkg share out (should be 4): 4
+dkg share sent out
+received
+dkg_share going to be sent
+state before sending dkg share out (should be 4): 4
+dkg share sent out
+staging dkg share
+staging dkg share
+staging dkg share
+received
+dkg_share going to be sent
+state before sending dkg share out (should be 4): 4
+dkg share sent out
+received
+dkg_share going to be sent
+state before sending dkg share out (should be 4): 4
+dkg share sent out
+staging dkg share
+received
+dkg_share going to be sent
+state before sending dkg share out (should be 4): 4
+dkg share sent out
+staging dkg share
+received
+dkg_share going to be sent
+state before sending dkg share out (should be 4): 4
+dkg share sent out
+received
+dkg_share going to be sent
+state before sending dkg share out (should be 4): 4
+dkg share sent out

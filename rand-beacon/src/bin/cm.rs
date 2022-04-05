@@ -44,9 +44,9 @@ use libp2p::{
     swarm::{NetworkBehaviourEventProcess, SwarmEvent, Swarm, SwarmBuilder},
     tcp::TokioTcpConfig,
     NetworkBehaviour, PeerId, Transport,
-    multihash::{Code, Multihash, MultihashDigest},
+    multihash::{Code, MultihashDigest},
 };
-use log::{error, info};
+use log::error;
 use once_cell::sync::Lazy;
 use tokio::{io::AsyncBufReadExt, sync::mpsc};
 
@@ -116,6 +116,7 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour{
         //message is a Vec<u8>
         if let FloodsubEvent::Message(message) = message {
 
+            //ERROR here, receiving participant struct
             if let Ok(a_participant) = Participant::<Bls12_381, BLSSignature<BLSSignatureG1<Bls12_381>>>::deserialize(&*message.data) {
                 let received_peer_id: PeerId = message.source;
                 let received_before = self.nodes_received.iter().any(|&p| p == received_peer_id);
@@ -179,6 +180,7 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour{
                             if self.nodes_received.len() == self.dkg_init.num_nodes{
                                 self.nodes_received = [].to_vec();
 
+                                /*
                                 let rng = &mut thread_rng();
                                 let dkg_srs = self.dkg_init.dkg_config.srs.clone();
                                 let vuf_srs = SigSRS::<Bls12_381>::setup_from_dkg(rng, dkg_srs.clone()).unwrap();
@@ -193,6 +195,15 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour{
                                     self.response_sender.clone(), 
                                     ChannelData::VUFData(vuf_init),
                                 );
+                                */
+                                self.state = 4;
+                                println!("DKG protocol completed.");
+
+                                // get time elapsed from start of DKG
+                                let start_time = self.start_time.clone();
+                                let this_start_time = start_time.unwrap();
+                                let elapsed = this_start_time.elapsed();
+                                println!("Time taken for DKG: {:?}", elapsed);
                             }
                         }
                     }
@@ -201,54 +212,63 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour{
             }
 
             if let Ok(node_sig) = VUFNodeData::<Bls12_381>::deserialize(&*message.data) {
-                println!("Received signature and proven pk from node!");
-                let cm_vuf_data = self.vuf_data.clone();
-                let vuf_data = cm_vuf_data.unwrap();
-                let vuf_msg = vuf_data.message;
-                let msg = &vuf_msg[..];
+                let received_peer_id: PeerId = message.source;
+                let received_before = self.nodes_received.iter().any(|&p| p == received_peer_id);
 
-                let this_proven_pk = node_sig.proven_pk;
-                let this_sig = node_sig.signature;
+                if self.state == 5 && !received_before {
+                    println!("Received signature and proven pk from node!");
+                    self.nodes_received = vec![];
+                    let cm_vuf_data = self.vuf_data.clone();
+                    let vuf_data = cm_vuf_data.unwrap();
+                    let vuf_msg = vuf_data.message;
+                    let msg = &vuf_msg[..];
 
-                this_proven_pk.verify().unwrap();
-                this_sig.verify_and_derive(this_proven_pk.clone(), &msg[..]).unwrap();
+                    let this_proven_pk = node_sig.proven_pk;
+                    let this_sig = node_sig.signature;
 
-                let mut current_proven_pks = self.vuf_sigs_pks.proven_pks.clone();
-                let mut current_sigs = self.vuf_sigs_pks.signatures.clone();
-                current_sigs.push(this_sig);
-                current_proven_pks.push(this_proven_pk); 
-                self.vuf_sigs_pks.signatures = current_sigs.clone();
-                self.vuf_sigs_pks.proven_pks = current_proven_pks.clone();
+                    // TO DO: MATCH ON THIS UNWRAP                                                                                                                                  
+                    this_proven_pk.verify().unwrap();
+                    this_sig.verify_and_derive(this_proven_pk.clone(), &msg[..]).unwrap();
 
-                // threshold of signatures reached
-                let threshold = self.dkg_init.dkg_config.degree;
-                if self.vuf_sigs_pks.signatures.len() == threshold{
+                    let mut current_proven_pks = self.vuf_sigs_pks.proven_pks.clone();
+                    let mut current_sigs = self.vuf_sigs_pks.signatures.clone();
+                    current_sigs.push(this_sig);
+                    current_proven_pks.push(this_proven_pk); 
+                    self.vuf_sigs_pks.signatures = current_sigs.clone();
+                    self.vuf_sigs_pks.proven_pks = current_proven_pks.clone();
 
-                    let vuf_srs = vuf_data.vuf_srs;
-                    let aggregated_pk = ProvenPublicKey::aggregate(&current_proven_pks[0..threshold], vuf_srs.clone()).unwrap();
-                    let aggregated_sig = Signature::aggregate(&current_sigs[0..threshold]).unwrap();
+                    // threshold of signatures reached
+                    let threshold = self.dkg_init.dkg_config.degree;
+                    if self.vuf_sigs_pks.signatures.len() == threshold {
+                        let vuf_srs = vuf_data.vuf_srs;
+                        let aggregated_pk = ProvenPublicKey::aggregate(&current_proven_pks[0..threshold], vuf_srs.clone()).unwrap();
+                        let aggregated_sig = Signature::aggregate(&current_sigs[0..threshold]).unwrap();
 
-                    aggregated_sig.verify_and_derive(aggregated_pk, msg).unwrap();
+                        aggregated_sig.verify_and_derive(aggregated_pk, msg).unwrap();
 
-                    let sz = aggregated_sig.serialized_size();
-                    let mut buffer = Vec::with_capacity(sz); 
-                    let buf_ref = buffer.by_ref();
-                    let _ = aggregated_sig.serialize(buf_ref);
-                    println!("sigma={:?}\n", &buffer);
+                        let sz = aggregated_sig.serialized_size();
+                        let mut buffer = Vec::with_capacity(sz); 
+                        let buf_ref = buffer.by_ref();
+                        let _ = aggregated_sig.serialize(buf_ref);
+                        println!("sigma={:?}\n", &buffer);
 
-                    // hash buffer containing aggregated signature
-                    let to_hash = &buffer[..];
-                    let multi_hash = Code::Sha2_256.digest(to_hash);
-                    let hash = multi_hash.digest();
-                    println!("sha2_256(sigma)= {:02x?}", hash);
-                    
-                    // get time elapsed from start of DKG
-                    let start_time = self.start_time.clone();
-                    let this_start_time = start_time.unwrap();
-                    let elapsed = this_start_time.elapsed();
-                    println!("Total time taken: {:?}", elapsed);
+                        // hash buffer containing aggregated signature
+                        let to_hash = &buffer[..];
+                        let multi_hash = Code::Sha2_256.digest(to_hash);
+                        let hash = multi_hash.digest();
+                        println!("sha2_256(sigma)={:02x?}", hash);
+                        
+                        // get time elapsed from start of DKG
+                        let start_time = self.start_time.clone();
+                        let this_start_time = start_time.unwrap();
+                        let elapsed = this_start_time.elapsed();
+                        println!("Total time taken for VUF: {:?}", elapsed);
+
+                        self.vuf_sigs_pks.signatures = vec![];
+                        self.vuf_sigs_pks.proven_pks = vec![];
+                        self.state = 4;
+                    }
                 }
-
             }
         }
     }
@@ -331,13 +351,13 @@ async fn main() -> Result<(), Box<dyn Error>>{
             cm_id: this_id,
             node_id: this_id,
             participant_id: 0,
-            node_list: [this_id].to_vec(),
-            nodes_received: [].to_vec(),
+            node_list: vec![this_id],
+            nodes_received: vec![],
             participants: None,
             vuf_data: None,
             vuf_sigs_pks: VUFNodesData {
-                proven_pks: [].to_vec(),
-                signatures: [].to_vec(),
+                proven_pks: vec![],
+                signatures: vec![],
             },
         };
 
@@ -364,26 +384,42 @@ async fn main() -> Result<(), Box<dyn Error>>{
             line = stdin.next_line() => {
                 let line = line?.expect("stdin closed");
                 println!("line: {:?}", &line);
-                //swarm.behaviour_mut().floodsub.publish(TOPIC.clone(), line.as_bytes());
-                if line == "start"{
-                    let start = Instant::now();
-                    swarm.behaviour_mut().start_time = Some(start);
-                    let peers = handle_list_peers(&mut swarm).await;
-                    init_dkg(degree, num_nodes, peers, &mut swarm).await;
-                }else if line == "check"{
-                    check_state(&mut swarm).await;
-                }else if line == "ls"{
-                    handle_list_peers(&mut swarm).await;
+                let input: Vec<&str> = line.as_str().split(" ").collect();
+                let first_cmd = input.get(0).unwrap().clone();
+                match first_cmd {
+                    "start"  => {
+                        let start = Instant::now();
+                        swarm.behaviour_mut().start_time = Some(start);
+                        let peers = handle_list_peers(&mut swarm, &num_nodes).await;
+                        init_dkg(degree, num_nodes, peers, &mut swarm).await;
+                    },
+                    "sign" => {
+                        let start = Instant::now();
+                        swarm.behaviour_mut().start_time = Some(start);
+                        let to_sign = input.get(1);
+                        match to_sign {
+                            Some(msg) => {
+                                println!("msg={}", msg);
+                                init_vuf(msg.as_bytes().to_vec(), &mut swarm).await;
+                            }
+                            None => {
+                                println!("ERROR: No message to sign found!");
+                            }
+                        }
+                    },
+                    "check" => {
+                        check_state(&mut swarm).await;
+                    },
+                    "ls" => {
+                        handle_list_peers(&mut swarm, &num_nodes).await;
+                    },
+                    _ => {},
                 }
             }
             
             // received from the channel
             response = response_rcv.recv() => {
-                //let json = serde_json::to_string(&response).expect("can jsonify response");
                 println!("received");
-                //swarm.behaviour_mut().floodsub.publish(TOPIC.clone(), json.into_bytes());
-
-                //match on 
                 match response {
                     Some(ChannelData::Participants(participants)) => {
                         println!("participants being sent to nodes");
@@ -393,10 +429,10 @@ async fn main() -> Result<(), Box<dyn Error>>{
                         println!("start agg. msg being sent to nodes");
                         send_message(msg, &mut swarm, 2, 3).await;
                     }
-                    Some(ChannelData::VUFData(vuf_init)) => {
-                        println!("vuf_init data being sent to nodes");
-                        send_vuf_init(vuf_init, &mut swarm).await;
-                    }
+                    //Some(ChannelData::VUFData(vuf_init)) => {
+                    //    println!("vuf_init data being sent to nodes");
+                    //    send_vuf_init(vuf_init, &mut swarm).await;
+                    //}
                     _ => {}
                 }
             }
@@ -413,7 +449,10 @@ async fn main() -> Result<(), Box<dyn Error>>{
 }
 
 
-async fn handle_list_peers(swarm: &mut Swarm<NodeBehaviour>) -> Vec<Vec<u8>>{
+async fn handle_list_peers(
+    swarm: &mut Swarm<NodeBehaviour>, 
+    num_nodes: &usize
+) -> Vec<Vec<u8>>{
     println!("Discovered Peers:");
     let nodes = swarm.behaviour().mdns.discovered_nodes();
     let mut bytes = vec![];
@@ -425,6 +464,7 @@ async fn handle_list_peers(swarm: &mut Swarm<NodeBehaviour>) -> Vec<Vec<u8>>{
     let all_nodes = Vec::from_iter(unique_peers);
     println!("{:?}", all_nodes);
     println!("Connected to {:?} Nodes!", all_nodes.len());
+    //assert_eq!(all_nodes.len(), *num_nodes);
     all_nodes.iter().for_each(|p| bytes.push(p.to_bytes())); 
     bytes
 }
@@ -512,19 +552,33 @@ async fn send_message(
     }
 }
 
-async fn send_vuf_init(
-    vuf_init: VUFInit<Bls12_381>,
+async fn init_vuf(
+    vuf_msg: Vec<u8>,
     swarm: &mut Swarm<NodeBehaviour>,
 ){
     let behaviour = swarm.behaviour_mut();
+    if behaviour.state != 4 {
+        return
+    }
+    println!("This config manager is starting the VUF!");
+
+    let rng = &mut thread_rng();
+    let dkg_srs = behaviour.dkg_init.dkg_config.srs.clone();
+    let vuf_srs = SigSRS::<Bls12_381>::setup_from_dkg(rng, dkg_srs.clone()).unwrap();
+    //let vuf_msg = b"hello";
+    let vuf_init = VUFInit {
+        vuf_srs: vuf_srs,
+        message: vuf_msg,
+    };
+    behaviour.vuf_data = Some(vuf_init.clone());
     
     let sz = vuf_init.serialized_size();
     let mut buffer = Vec::with_capacity(sz); 
     let buf_ref = buffer.by_ref();
     let _ = vuf_init.serialize(buf_ref);
     
-    if behaviour.state == 3{
+    if behaviour.state == 4{
         behaviour.floodsub.publish(TOPIC.clone(), buffer);
-        behaviour.state = 4;
+        behaviour.state = 5;
     }
 }
