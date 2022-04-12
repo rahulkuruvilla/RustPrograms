@@ -101,7 +101,8 @@ fn print_transcript_size<
             pairing_type: PhantomData,
             id: i,
             public_key_sig: dealer_keypair_sig.1,
-            state: ParticipantState::Dealer,
+            //state: ParticipantState::Dealer,
+            state: 0,
         };
         let dealer = Dealer::<Bls12_381, SSIG> {
             private_key_sig: dealer_keypair_sig.0,

@@ -94,6 +94,7 @@ impl<
                     .into_affine()
             })
             .collect::<Vec<_>>();
+        //debug y_eval_i
         let y_i = y_eval_i
             .iter()
             .enumerate()
@@ -102,7 +103,7 @@ impl<
                     .aggregator
                     .participants
                     .get(&i)
-                    .ok_or(DKGError::<E>::InvalidParticipantId(i))?     //this fails!!!!!
+                    .ok_or(DKGError::<E>::InvalidParticipantId(i))?             //this fails!!!!!, secret is at index 0 says Philipp
                     .public_key_sig
                     .mul(a.into_repr())
                     .into_affine())

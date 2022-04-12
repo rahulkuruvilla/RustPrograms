@@ -20,7 +20,7 @@ use ark_ff::{UniformRand, Zero};
 use ark_serialize::*;
 use ark_serialize::Write;
 use rand::{thread_rng};
-use std::marker::PhantomData;
+use std::{marker::PhantomData, env};
 
 use sha2::{Sha256, Digest}; //hash final signature
 
@@ -179,9 +179,11 @@ fn _dkg_vuf_runthrough() {
 
 fn dkg_vuf_runthrough2() {
     //CM sends these NODES and rng (degree sent later)
-    const NODES: usize = 4; 
-    let rng = &mut thread_rng(); //DKG secret
-    let rng2 = &mut thread_rng(); 
+    //eg) NODES=4, degree=3
+    let args: Vec<String> = env::args().collect();
+    let n = &args[1];
+    let NODES: usize = n.parse().unwrap();
+    let rng = &mut thread_rng();
 
     let dkg_srs = DkgSRS::<Bls12_381>::setup(rng).unwrap();
 
@@ -199,7 +201,10 @@ fn dkg_vuf_runthrough2() {
     };
 
     let u_1 = G2Projective::rand(rng).into_affine();
-    let degree = 3; //degree t polynomial - for threshold
+    let degree = (2 * NODES + 2) / 3; //degree t polynomial - for threshold
+    //let degree = 5;
+    println!("degree={}", &degree);
+    //let degree = 3;
 
     //CM sends this
     let dkg_config = Config {
@@ -211,6 +216,7 @@ fn dkg_vuf_runthrough2() {
     //each node generates their dealer struct
     let mut dealers = vec![];
     for i in 0..NODES {
+        println!("i={}", i);
         let dealer_keypair_sig = bls_sig.generate_keypair(rng).unwrap();
         let participant = Participant {
             pairing_type: PhantomData,
@@ -255,10 +261,7 @@ fn dkg_vuf_runthrough2() {
     // "gossip phase" - for each node, each other node receives a share from it
     for i in 0..NODES {
         let node = &mut nodes[i];
-        let share = node.share(rng2).unwrap();
-        if i == (NODES-1){
-            let share = node.share(rng).unwrap();
-        }
+        let share = node.share(rng).unwrap();
         for j in 0..NODES {
             if i == j{
                 continue;
@@ -299,7 +302,7 @@ fn dkg_vuf_runthrough2() {
     let mut proven_public_keys = vec![];
     for i in 0..NODES {
         let keypair = Keypair::generate_keypair_from_dkg(rng, vuf_srs.clone(), pks[i], sks[i]).unwrap(); // node generate this
-        let proven_public_key = keypair.prove_key().unwrap();                                            // node generate this
+        let proven_public_key = keypair.prove_key().unwrap();                                            // node generate this + sends to cm
 
         proven_public_key.verify().unwrap(); 
 
@@ -311,19 +314,19 @@ fn dkg_vuf_runthrough2() {
     // other nodes can verify this sigature against the public key of the node that made it    
     let mut signatures = vec![];
     for i in 0..NODES {
-        let signature = keypairs[i].sign(&message[..]).unwrap();                // node generates this
+        let signature = keypairs[i].sign(&message[..]).unwrap();                // node generates this + sends to cm
 
+        proven_public_keys[i].verify().unwrap();                               //receiving cm checks this
         signature                                                              //receiving cm checks this 
             .verify_and_derive(proven_public_keys[i].clone(), &message[..])      
             .unwrap();
-        proven_public_keys[i].verify().unwrap();                               //receiving cm checks this
         signatures.push(signature);                                            //cm does this
         //proven_public_keys.push(proven_public_key);                          //cm does this
     }
 
     //agrregation step
-    let threshold = NODES;
-    //let threshold = degree;
+    //let threshold = NODES;
+    let threshold = degree;
 
     //let master_keypair = Keypair::generate_keypair_from_dkg(rng, vuf_srs.clone(), master_pk, sks[0]).unwrap(); 
     //let master_proven_public_key = master_keypair.prove_key().unwrap();

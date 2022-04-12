@@ -289,12 +289,13 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour {
                     let msg = &vuf_msg[..];
 
                     let rng = &mut thread_rng();
-                    let this_keypair = Keypair::generate_keypair_from_dkg(rng, vuf_init.vuf_srs.clone(), node_pk, node_sk).unwrap();
+                    let this_keypair = Keypair::generate_keypair_from_dkg(rng, vuf_init.vuf_srs.clone(), 
+                        node_pk, node_sk).unwrap();
                     let this_proven_pk = this_keypair.prove_key().unwrap();  
                     let this_signature = this_keypair.sign(&msg[..]).unwrap();
 
                     self.node_extra.vuf_init = Some(vuf_init.clone());
-                    let vuf_node_data = VUFNodeData{
+                    let vuf_node_data = VUFNodeData {
                         proven_pk: this_proven_pk,
                         signature: this_signature,
                     };
@@ -505,9 +506,10 @@ async fn send_participant(
     let behaviour = swarm.behaviour_mut();
 
     let sz = party.serialized_size();
-    let mut buffer = Vec::with_capacity(sz); 
-    let buf_ref = buffer.by_ref();
-    let _ = party.serialize(buf_ref);
+    println!("This Size(Participant)={:?}", sz); 
+
+    let mut buffer: Vec<u8> = Vec::new(); 
+    party.serialize(&mut buffer).unwrap();
     
     if behaviour.state == 1 {
         behaviour.floodsub.publish(TOPIC.clone(), buffer);
@@ -524,7 +526,7 @@ async fn send_message(
     let behaviour = swarm.behaviour_mut();
     let json_data = serde_json::to_string(&msg).expect("Can't serialize to json!");
     
-    println!("current node state ={}", behaviour.state);
+    println!("current node state ={}, next state={}", behaviour.state, end_state);
     if behaviour.state == start_state {
         println!("going to be published to the network: {}", msg);
         behaviour.floodsub.publish(TOPIC.clone(), json_data.as_bytes());
@@ -539,9 +541,10 @@ async fn send_dkg_share(
     let behaviour = swarm.behaviour_mut();
 
     let sz = share.serialized_size();
-    let mut buffer = Vec::with_capacity(sz); 
-    let buf_ref = buffer.by_ref();
-    let _ = share.serialize(buf_ref);
+    println!("This Size(DKGShare)={:?}", sz); 
+    let mut buffer: Vec<u8> = Vec::new();
+    println!("buffer:{:?}", buffer);
+    share.serialize(&mut buffer).unwrap();
     
     //these states need to be changed
     println!("state before sending dkg share out (should be 4): {}", behaviour.state);
@@ -559,6 +562,7 @@ async fn send_vuf_data(
     let behaviour = swarm.behaviour_mut();
 
     let sz = vuf_data.serialized_size();
+    println!("This Size(VUFNodeData)={:?}", sz);
     let mut buffer = Vec::with_capacity(sz); 
     let buf_ref = buffer.by_ref();
     let _ = vuf_data.serialize(buf_ref);

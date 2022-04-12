@@ -21,10 +21,9 @@ use aggregatable_dkg::{
 };
 use ark_bls12_381::{Bls12_381, G2Projective};
 use ark_ec::{ProjectiveCurve, PairingEngine};
-use ark_ff::{UniformRand, Zero};
+use ark_ff::UniformRand;
 use ark_serialize::*;
 use ark_serialize::Write;
-use std::marker::PhantomData;
 use rand::{thread_rng};
 
 #[derive(CanonicalSerialize, CanonicalDeserialize, Clone)]

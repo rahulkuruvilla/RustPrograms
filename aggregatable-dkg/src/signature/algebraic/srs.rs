@@ -28,19 +28,4 @@ impl<E: PairingEngine> SRS<E> {
         };
         Ok(srs)
     }
-
-    //my defn. to take from dkg
-    pub fn setup_from_dkg<R: Rng>(rng: &mut R) -> Result<Self, SignatureError> {
-        let srs = Self {
-            //both like in DKG so use these from the DKG
-            g_1_g2: E::G2Affine::prime_subgroup_generator(), //g_1 from G_2
-            h_g1: E::G1Affine::prime_subgroup_generator(),   //h from G_1
-
-            // make new of these on the original rng
-            g_2_g2: E::G2Projective::rand(rng).into_affine(),
-            g_3_g2: E::G2Projective::rand(rng).into_affine(),
-            g_4_g2: E::G2Projective::rand(rng).into_affine(),
-        };
-        Ok(srs)
-    }
 }

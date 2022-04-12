@@ -116,7 +116,6 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour{
         //message is a Vec<u8>
         if let FloodsubEvent::Message(message) = message {
 
-            //ERROR here, receiving participant struct
             if let Ok(a_participant) = Participant::<Bls12_381, BLSSignature<BLSSignatureG1<Bls12_381>>>::deserialize(&*message.data) {
                 let received_peer_id: PeerId = message.source;
                 let received_before = self.nodes_received.iter().any(|&p| p == received_peer_id);
@@ -159,12 +158,16 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour{
 
             if let Ok(msg) = serde_json::from_slice::<String>(&message.data) {
                 let received_peer_id: PeerId = message.source;
+                println!("current nodes_received: {:?}", self.nodes_received.len());
                 let received_before = self.nodes_received.iter().any(|&p| p == received_peer_id);
+                println!("received msg={}", msg);
                 match msg.as_str() {
                     "Ready to aggregate" => {
+                        println!("been received before: {}", received_before);
                         if self.state == 2 && !received_before {
                             self.nodes_received.push(received_peer_id);
-                            if self.nodes_received.len() == self.dkg_init.num_nodes{
+                            //if self.nodes_received.len() == self.dkg_init.num_nodes{
+                            if self.nodes_received.len() == self.dkg_init.dkg_config.degree{
                                 self.nodes_received = [].to_vec();
                                 stage_channel_data(
                                     self.response_sender.clone(), 
@@ -246,22 +249,20 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour{
 
                         aggregated_sig.verify_and_derive(aggregated_pk, msg).unwrap();
 
-                        let sz = aggregated_sig.serialized_size();
-                        let mut buffer = Vec::with_capacity(sz); 
-                        let buf_ref = buffer.by_ref();
-                        let _ = aggregated_sig.serialize(buf_ref);
+                        let mut buffer = Vec::new(); 
+                        aggregated_sig.serialize(&mut buffer).unwrap();
                         println!("sigma={:?}\n", &buffer);
+
+                        // get time elapsed from start of DKG
+                        let start_time = self.start_time.clone();
+                        let this_start_time = start_time.unwrap();
+                        let elapsed = this_start_time.elapsed();
 
                         // hash buffer containing aggregated signature
                         let to_hash = &buffer[..];
                         let multi_hash = Code::Sha2_256.digest(to_hash);
                         let hash = multi_hash.digest();
                         println!("sha2_256(sigma)={:02x?}", hash);
-                        
-                        // get time elapsed from start of DKG
-                        let start_time = self.start_time.clone();
-                        let this_start_time = start_time.unwrap();
-                        let elapsed = this_start_time.elapsed();
                         println!("Total time taken for VUF: {:?}", elapsed);
 
                         self.vuf_sigs_pks.signatures = vec![];
@@ -312,7 +313,6 @@ async fn main() -> Result<(), Box<dyn Error>>{
     let n = &args[2];
     let degree: usize = t.parse().unwrap();
     let num_nodes: usize = n.parse().unwrap();
-
 
     let id_keys = identity::Keypair::generate_ed25519();
     let peer_id = PeerId::from(id_keys.public());
@@ -396,11 +396,12 @@ async fn main() -> Result<(), Box<dyn Error>>{
                     "sign" => {
                         let start = Instant::now();
                         swarm.behaviour_mut().start_time = Some(start);
-                        let to_sign = input.get(1);
+                        let to_sign = input.get(1..input.len()); 
                         match to_sign {
                             Some(msg) => {
-                                println!("msg={}", msg);
-                                init_vuf(msg.as_bytes().to_vec(), &mut swarm).await;
+                                let data: String = msg.join(" ");
+                                println!("msg={}", data);
+                                init_vuf(data.as_bytes().to_vec(), &mut swarm).await;
                             }
                             None => {
                                 println!("ERROR: No message to sign found!");
@@ -526,6 +527,7 @@ async fn send_participants(
     let behaviour = swarm.behaviour_mut();
 
     let sz = participants.serialized_size();
+    println!("This Size(Participants)={:?}", sz);
     let mut buffer = Vec::with_capacity(sz); 
     let buf_ref = buffer.by_ref();
     let _ = participants.serialize(buf_ref);
