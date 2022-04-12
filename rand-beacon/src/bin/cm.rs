@@ -27,15 +27,20 @@ use ark_serialize::*;
 use rand::{thread_rng};
 use std::{
     error::Error,
-    collections::HashSet,
-    time::Instant,
+    collections::{HashSet, hash_map::DefaultHasher},
+    time::{Instant, Duration},
+    hash::{Hash, Hasher},
     env,
 };
 
 // libp2p imports--------------------------------------------------------
 use libp2p::{
     core::upgrade,
-    floodsub::{Floodsub, FloodsubEvent, Topic},
+    //floodsub::{Floodsub, FloodsubEvent, Topic},
+    gossipsub::{
+        Gossipsub, GossipsubEvent, GossipsubConfigBuilder, 
+        GossipsubMessage, IdentTopic as Topic,
+        MessageAuthenticity, ValidationMode, MessageId},
     futures::StreamExt,
     identity,
     mdns::{Mdns, MdnsEvent},
@@ -70,7 +75,7 @@ pub enum ChannelData{
 #[derive(NetworkBehaviour)]
 #[behaviour(event_process = true)]
 pub struct NodeBehaviour {
-    pub floodsub: Floodsub,
+    pub gossipsub: Gossipsub,
     pub mdns: Mdns,
 
     #[behaviour(ignore)]
@@ -110,14 +115,15 @@ pub struct NodeBehaviour {
     pub vuf_sigs_pks: VUFNodesData::<Bls12_381>,
 }
 
-impl NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour{
+impl NetworkBehaviourEventProcess<GossipsubEvent> for NodeBehaviour{
     // Called when `floodsub` produces an event.
-    fn inject_event(&mut self, message: FloodsubEvent) {
+    fn inject_event(&mut self, message: GossipsubEvent) {
         //message is a Vec<u8>
-        if let FloodsubEvent::Message(message) = message {
+        if let GossipsubEvent::Message{propagation_source, message_id, message} = message {
+            println!("Received gossipsub message from {:?}", message.source.unwrap());
 
             if let Ok(a_participant) = Participant::<Bls12_381, BLSSignature<BLSSignatureG1<Bls12_381>>>::deserialize(&*message.data) {
-                let received_peer_id: PeerId = message.source;
+                let received_peer_id: PeerId = message.source.unwrap();
                 let received_before = self.nodes_received.iter().any(|&p| p == received_peer_id);
                 println!("Participant received from:{}, received_before:{}", &received_peer_id, &received_before);
                 //if not rec before then append to self.nodes_rec
@@ -157,7 +163,7 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour{
             }
 
             if let Ok(msg) = serde_json::from_slice::<String>(&message.data) {
-                let received_peer_id: PeerId = message.source;
+                let received_peer_id: PeerId = message.source.unwrap();
                 println!("current nodes_received: {:?}", self.nodes_received.len());
                 let received_before = self.nodes_received.iter().any(|&p| p == received_peer_id);
                 println!("received msg={}", msg);
@@ -166,8 +172,8 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour{
                         println!("been received before: {}", received_before);
                         if self.state == 2 && !received_before {
                             self.nodes_received.push(received_peer_id);
-                            //if self.nodes_received.len() == self.dkg_init.num_nodes{
-                            if self.nodes_received.len() == self.dkg_init.dkg_config.degree{
+                            if self.nodes_received.len() == self.dkg_init.num_nodes{
+                            //if self.nodes_received.len() == self.dkg_init.dkg_config.degree{
                                 self.nodes_received = [].to_vec();
                                 stage_channel_data(
                                     self.response_sender.clone(), 
@@ -215,7 +221,7 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour{
             }
 
             if let Ok(node_sig) = VUFNodeData::<Bls12_381>::deserialize(&*message.data) {
-                let received_peer_id: PeerId = message.source;
+                let received_peer_id: PeerId = message.source.unwrap();
                 let received_before = self.nodes_received.iter().any(|&p| p == received_peer_id);
 
                 if self.state == 5 && !received_before {
@@ -283,13 +289,13 @@ impl NetworkBehaviourEventProcess<MdnsEvent> for NodeBehaviour {
         match event {
             MdnsEvent::Discovered(list) => {
                 for (peer, _) in list {
-                    self.floodsub.add_node_to_partial_view(peer);
+                    self.gossipsub.add_explicit_peer(&peer);
                 }
             }
             MdnsEvent::Expired(list) => {
                 for (peer, _) in list {
                     if !self.mdns.has_node(&peer) {
-                        self.floodsub.remove_node_from_partial_view(&peer);
+                        self.gossipsub.remove_explicit_peer(&peer);
                     }
                 }
             }
@@ -341,8 +347,32 @@ async fn main() -> Result<(), Box<dyn Error>>{
     let this_id = peer_id.clone();
     let mut swarm = {
         let mdns = Mdns::new(Default::default()).await?;
+
+        // To content-address message, we can take the hash of message and use it as an ID.
+        let message_id_fn = |message: &GossipsubMessage| {
+            let mut h = DefaultHasher::new();
+            let mut source = message.source.unwrap().to_bytes();
+            let mut data = message.data.clone();
+            source.append(&mut data);
+            source.hash(&mut h);
+            MessageId::from(h.finish().to_string())
+        };
+
+        // Set a custom gossipsub
+        let gossipsub_config = GossipsubConfigBuilder::default()
+            .heartbeat_interval(Duration::from_secs(10)) // This is set to aid debugging by not cluttering the log space
+            .validation_mode(ValidationMode::Strict) // This sets the kind of message validation. The default is Strict (enforce message signing)
+            .message_id_fn(message_id_fn) // content-address messages. No two messages of the same content will be propagated.
+            .build()
+            .expect("Valid config");
+
+        // build a gossipsub network behaviour
+        let gossipsub: Gossipsub =
+            Gossipsub::new(MessageAuthenticity::Signed(id_keys), gossipsub_config)
+                .expect("Correct configuration");
+
         let mut behaviour = NodeBehaviour {
-            floodsub: Floodsub::new(peer_id.clone()),
+            gossipsub,
             mdns,
             response_sender,
             state,
@@ -361,7 +391,7 @@ async fn main() -> Result<(), Box<dyn Error>>{
             },
         };
 
-        behaviour.floodsub.subscribe(TOPIC.clone());
+        behaviour.gossipsub.subscribe(&TOPIC).unwrap();
 
         // We want the connection background tasks to be spawned
         // onto the tokio runtime.
@@ -449,7 +479,6 @@ async fn main() -> Result<(), Box<dyn Error>>{
     
 }
 
-
 async fn handle_list_peers(
     swarm: &mut Swarm<NodeBehaviour>, 
     num_nodes: &usize
@@ -512,7 +541,9 @@ async fn init_dkg(
     let buf_ref = buffer.by_ref();
     let _ = cm_dkg_init.serialize(buf_ref);
     
-    behaviour.floodsub.publish(TOPIC.clone(), buffer);
+    if let Err(e) = behaviour.gossipsub.publish(TOPIC.clone(), buffer){
+        error!("ERROR: DKGInit not published! {:?}", e);
+    }
     println!("published");
 
     behaviour.state = 1;
@@ -533,7 +564,9 @@ async fn send_participants(
     let _ = participants.serialize(buf_ref);
     
     if behaviour.state == 1 {
-        behaviour.floodsub.publish(TOPIC.clone(), buffer);
+        if let Err(e) = behaviour.gossipsub.publish(TOPIC.clone(), buffer){
+            error!("ERROR: Participants not published! {:?}", e);
+        }
         behaviour.state = 2;
         println!("published");
     }
@@ -549,7 +582,9 @@ async fn send_message(
     let json_data = serde_json::to_string(&msg).expect("Can't serialize to json!");
     
     if behaviour.state == start_state {
-        behaviour.floodsub.publish(TOPIC.clone(), json_data.as_bytes());
+        if let Err(e) = behaviour.gossipsub.publish(TOPIC.clone(), json_data.as_bytes()){
+            error!("ERROR: Message not published! {:?}", e);
+        }
         behaviour.state = end_state;
     }
 }
@@ -580,7 +615,9 @@ async fn init_vuf(
     let _ = vuf_init.serialize(buf_ref);
     
     if behaviour.state == 4{
-        behaviour.floodsub.publish(TOPIC.clone(), buffer);
+        if let Err(e) = behaviour.gossipsub.publish(TOPIC.clone(), buffer){
+            error!("ERROR: VUFInit not published! {:?}", e);
+        }
         behaviour.state = 5;
     }
 }

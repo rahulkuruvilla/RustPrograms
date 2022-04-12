@@ -35,7 +35,11 @@ use std::marker::PhantomData;
 // libp2p imports--------------------------------------------------------
 use libp2p::{
     core::upgrade,
-    floodsub::{Floodsub, FloodsubEvent, Topic},
+    //floodsub::{Floodsub, FloodsubEvent, Topic},
+    gossipsub::{
+        Gossipsub, GossipsubEvent, GossipsubConfigBuilder, 
+        GossipsubMessage, IdentTopic as Topic,
+        MessageAuthenticity, ValidationMode, MessageId},
     futures::StreamExt,
     identity,
     mdns::{Mdns, MdnsEvent},
@@ -47,7 +51,11 @@ use libp2p::{
 };
 use log::{error, info};
 use std::error::Error;
-use std::collections::HashSet;
+use std::{
+    time::Duration,
+    collections::{HashSet, hash_map::DefaultHasher},
+    hash::{Hash, Hasher},
+};
 use once_cell::sync::Lazy;
 use tokio::{io::AsyncBufReadExt, sync::mpsc};
 
@@ -88,7 +96,7 @@ pub struct NodeInfo{
 #[derive(NetworkBehaviour)]
 #[behaviour(event_process = true)]
 pub struct NodeBehaviour {
-    pub floodsub: Floodsub,
+    pub gossipsub: Gossipsub,
     pub mdns: Mdns,
 
     #[behaviour(ignore)]
@@ -119,11 +127,12 @@ pub struct NodeBehaviour {
     pub node_extra: NodeInfo,
 }
 
-impl NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour {
+impl NetworkBehaviourEventProcess<GossipsubEvent> for NodeBehaviour {
     // Called when `floodsub` produces an event.
-    fn inject_event(&mut self, message: FloodsubEvent) {
+    fn inject_event(&mut self, message: GossipsubEvent) {
         //message is a Vec<u8>
-        if let FloodsubEvent::Message(message) = message {
+        if let GossipsubEvent::Message{propagation_source, message_id, message} = message {
+            //println!("Received gossipsub message from {:?}", message.source.unwrap());
 
             //assume this msg only comes from config manager only
             if let Ok(dkg_init) = DKGInit::<Bls12_381>::deserialize(&*message.data) {
@@ -145,7 +154,7 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour {
                     
                     self.dkg_init = dkg_init.clone();
                     self.state = 1;
-                    self.cm_id = message.source;
+                    self.cm_id = message.source.unwrap();
 
                     let bls_sig = BLSSignature::<BLSSignatureG1<Bls12_381>> {
                         srs: BLSSRS {
@@ -189,7 +198,7 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour {
             
             if let Ok(ps) = Vec::<Participant::<Bls12_381, 
                 BLSSignature<BLSSignatureG1<Bls12_381>>>>::deserialize(&*message.data) {
-                if self.state == 2 && message.source == self.cm_id {
+                if self.state == 2 && message.source.unwrap() == self.cm_id {
                     println!("Received participants struct from cm "); 
                     ps.iter().for_each(|p| println!("{}", p.id));
                     println!("ps.len()={}", ps.len());
@@ -232,10 +241,10 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour {
             if let Ok(msg) = serde_json::from_slice::<String>(&message.data) {
                 match msg.as_str() {
                     "Begin Aggregation" => {
-                        if self.state == 4 && message.source == self.cm_id {
+                        if self.state == 4 && message.source.unwrap() == self.cm_id {
                             let node_data = self.node_extra.clone();
                             let node_share = node_data.share.unwrap();
-                            println!("staging dkg share");
+                            println!("Received 'Begin Aggr.' from CM \nStaging dkg share");
                             stage_channel_data(
                                 self.response_sender.clone(), 
                                 ChannelData::Share(node_share),
@@ -249,7 +258,7 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour {
             //aggregate received DKG share
             if let Ok(dkg_share) = DKGShare::<Bls12_381, BLSSignature<BLSSignatureG2<Bls12_381>>, 
                     BLSSignature<BLSSignatureG1<Bls12_381>>>::deserialize(&*message.data){
-                let received_peer_id: PeerId = message.source;
+                let received_peer_id: PeerId = message.source.unwrap();
                 let received_before = self.nodes_received.iter().any(|&p| p == received_peer_id);
 
                 println!("current state={}", self.state);
@@ -263,7 +272,7 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour {
                     self.node_extra.node = Some(node.clone());
                     self.nodes_received.push(received_peer_id);
                     if self.nodes_received.len() == self.dkg_init.num_nodes{
-                        self.nodes_received = [].to_vec();
+                        self.nodes_received = vec![];
                         println!("getting this node's pk and sk");
 
                         let pk = node.get_public_key().unwrap();
@@ -282,7 +291,7 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for NodeBehaviour {
 
             // recv. vuf_srs and message from config manager
             if let Ok(vuf_init) = VUFInit::<Bls12_381>::deserialize(&*message.data) {
-                if self.state == 6 && message.source == self.cm_id {
+                if self.state == 6 && message.source.unwrap() == self.cm_id {
                     let node_pk = self.node_extra.dkg_pk_share.unwrap();
                     let node_sk = self.node_extra.dkg_sk_share.unwrap();
                     let vuf_msg = vuf_init.message.clone();
@@ -320,13 +329,13 @@ impl NetworkBehaviourEventProcess<MdnsEvent> for NodeBehaviour {
         match event {
             MdnsEvent::Discovered(list) => {
                 for (peer, _) in list {
-                    self.floodsub.add_node_to_partial_view(peer);
+                    self.gossipsub.add_explicit_peer(&peer);
                 }
             }
             MdnsEvent::Expired(list) => {
                 for (peer, _) in list {
                     if !self.mdns.has_node(&peer) {
-                        self.floodsub.remove_node_from_partial_view(&peer);
+                        self.gossipsub.remove_explicit_peer(&peer);
                     }
                 }
             }
@@ -336,6 +345,7 @@ impl NetworkBehaviourEventProcess<MdnsEvent> for NodeBehaviour {
 
 fn stage_channel_data(sender: mpsc::UnboundedSender<ChannelData>, data: ChannelData) {
     tokio::spawn(async move {
+        println!("Sending data on channel.");
         if let Err(e) = sender.send(data) {
             error!("ERROR (Channel data not sent): {}", e);
         }
@@ -373,8 +383,32 @@ async fn main() -> Result<(), Box<dyn Error>>{
     let this_id = peer_id.clone();
     let mut swarm = {
         let mdns = Mdns::new(Default::default()).await?;
+
+        // To content-address message, we can take the hash of message and use it as an ID.
+        let message_id_fn = |message: &GossipsubMessage| {
+            let mut h = DefaultHasher::new();
+            let mut source = message.source.unwrap().to_bytes();
+            let mut data = message.data.clone();
+            source.append(&mut data);
+            source.hash(&mut h);
+            MessageId::from(h.finish().to_string())
+        };
+
+        // Set a custom gossipsub
+        let gossipsub_config = GossipsubConfigBuilder::default()
+            .heartbeat_interval(Duration::from_secs(10)) // This is set to aid debugging by not cluttering the log space
+            .validation_mode(ValidationMode::Strict) // This sets the kind of message validation. The default is Strict (enforce message signing)
+            .message_id_fn(message_id_fn) // content-address messages. No two messages of the same content will be propagated.
+            .build()
+            .expect("Valid config");
+
+        // build a gossipsub network behaviour
+        let gossipsub: Gossipsub =
+            Gossipsub::new(MessageAuthenticity::Signed(id_keys), gossipsub_config)
+                .expect("Correct configuration");
+
         let mut behaviour = NodeBehaviour{
-            floodsub: Floodsub::new(peer_id.clone()),
+            gossipsub,
             mdns,
             response_sender,
             state,
@@ -382,8 +416,8 @@ async fn main() -> Result<(), Box<dyn Error>>{
             cm_id: this_id,
             node_id: this_id,
             participant_id: 0,
-            node_list: [this_id].to_vec(),
-            nodes_received: [this_id].to_vec(),
+            node_list: vec![this_id],
+            nodes_received: vec![this_id],
             node_extra: NodeInfo{
                 bls_sig: None,
                 bls_pok: None,
@@ -399,7 +433,7 @@ async fn main() -> Result<(), Box<dyn Error>>{
             },
         };
 
-        behaviour.floodsub.subscribe(TOPIC.clone());
+        behaviour.gossipsub.subscribe(&TOPIC).unwrap();
 
         // We want the connection background tasks to be spawned
         // onto the tokio runtime.
@@ -411,7 +445,7 @@ async fn main() -> Result<(), Box<dyn Error>>{
     };
 
     // Read full lines from stdin
-    //let mut stdin = tokio::io::BufReader::new(tokio::io::stdin()).lines();
+    let mut stdin = tokio::io::BufReader::new(tokio::io::stdin()).lines();
 
     // Listen on all interfaces and whatever port the OS assigns
     swarm.listen_on("/ip4/0.0.0.0/tcp/0".parse()?)?;
@@ -419,7 +453,7 @@ async fn main() -> Result<(), Box<dyn Error>>{
     loop {
         tokio::select! {
             //received from stdin 
-            /*line = stdin.next_line() => {
+            line = stdin.next_line() => {
                 let line = line?.expect("stdin closed");
                 println!("line: {:?}", &line);
                 //swarm.behaviour_mut().floodsub.publish(TOPIC.clone(), line.as_bytes());
@@ -432,15 +466,13 @@ async fn main() -> Result<(), Box<dyn Error>>{
                     },
                     _ => {},
                 }
-            }*/
+            }
             
             // received from the channel
             response = response_rcv.recv() => {
-                //let json = serde_json::to_string(&response).expect("can jsonify response");
                 println!("received data on channel");
-                //swarm.behaviour_mut().floodsub.publish(TOPIC.clone(), json.into_bytes());
 
-                //match on 
+                //match on reponse
                 match response {
                     Some(ChannelData::Party(participant)) => {
                         println!("participant is going to be sent");
@@ -477,10 +509,9 @@ async fn main() -> Result<(), Box<dyn Error>>{
     
 }
 
-async fn list_peers(swarm: &mut Swarm<NodeBehaviour>) -> Vec<Vec<u8>>{
+async fn list_peers(swarm: &mut Swarm<NodeBehaviour>){
     println!("Discovered Peers:");
     let nodes = swarm.behaviour().mdns.discovered_nodes();
-    let mut bytes = vec![];
     let mut unique_peers = HashSet::new();
     for peer in nodes {
         unique_peers.insert(peer);
@@ -488,8 +519,7 @@ async fn list_peers(swarm: &mut Swarm<NodeBehaviour>) -> Vec<Vec<u8>>{
 
     let all_nodes = Vec::from_iter(unique_peers);
     println!("{:?}", all_nodes);
-    all_nodes.iter().for_each(|p| bytes.push(p.to_bytes())); 
-    bytes
+    println!("Connected to {:?} Nodes!", all_nodes.len());
 }
 
 // for debugging purposes
@@ -512,7 +542,9 @@ async fn send_participant(
     party.serialize(&mut buffer).unwrap();
     
     if behaviour.state == 1 {
-        behaviour.floodsub.publish(TOPIC.clone(), buffer);
+        if let Err(e) = behaviour.gossipsub.publish(TOPIC.clone(), buffer){
+            error!("ERROR: Participant not published! {:?}", e);
+        }
         behaviour.state = 2;
     }
 }
@@ -529,7 +561,9 @@ async fn send_message(
     println!("current node state ={}, next state={}", behaviour.state, end_state);
     if behaviour.state == start_state {
         println!("going to be published to the network: {}", msg);
-        behaviour.floodsub.publish(TOPIC.clone(), json_data.as_bytes());
+        if let Err(e) = behaviour.gossipsub.publish(TOPIC.clone(), json_data.as_bytes()){
+            error!("ERROR: Message not published! {:?}", e);
+        }
         behaviour.state = end_state;
     }
 }
@@ -549,7 +583,9 @@ async fn send_dkg_share(
     //these states need to be changed
     println!("state before sending dkg share out (should be 4): {}", behaviour.state);
     if behaviour.state == 4 {
-        behaviour.floodsub.publish(TOPIC.clone(), buffer);
+        if let Err(e) = behaviour.gossipsub.publish(TOPIC.clone(), buffer){
+            error!("ERROR: DKG Share not published! {:?}", e);
+        }
         println!("dkg share sent out");
         behaviour.state = 5;
     }
@@ -568,6 +604,8 @@ async fn send_vuf_data(
     let _ = vuf_data.serialize(buf_ref);
     
     if behaviour.state == 6 {
-        behaviour.floodsub.publish(TOPIC.clone(), buffer);
+        if let Err(e) = behaviour.gossipsub.publish(TOPIC.clone(), buffer){
+            error!("ERROR: VUF Data not published! {:?}", e);
+        }
     }
 }
